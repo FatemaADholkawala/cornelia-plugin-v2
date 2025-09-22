@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useCallback, useEffect, useState } from "react";
-import { Layout, Button, Typography, message, Input, Space } from "antd";
-import { ArrowLeftOutlined, LogoutOutlined } from "@ant-design/icons";
+import React, { useCallback, useEffect } from "react";
+import { Layout, Button, Typography, message, Input } from "antd";
+import { ArrowLeftOutlined } from "@ant-design/icons";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDocument } from "@/hooks/useDocument";
 import { useSummary } from "@/hooks/useSummary";
@@ -12,17 +12,14 @@ import { useBrainstorm } from "@/hooks/useBrainstorm";
 import { useDraft } from "@/hooks/useDraft";
 import { useParties } from "@/hooks/useParties";
 import { analysisApi } from "@/services/api";
-import { DEMO_DOCUMENTS, DEMO_SCENARIOS } from "@/data/demoData";
-import { ActiveView, CommentDraft, RedraftContent } from "@/types";
 import Timer from "./Timer";
 import MainContent from "./MainContent";
-import DocumentSelector from "./DocumentSelector";
 
 const { Text } = Typography;
 const { Content } = Layout;
 
 const AppContent: React.FC = () => {
-	const { isAuthenticated, logout, user } = useAuth();
+	const { isAuthenticated, logout } = useAuth();
 
 	const {
 		documentContent,
@@ -33,44 +30,6 @@ const AppContent: React.FC = () => {
 		setSelectedText,
 		handleCommentUpdate,
 	} = useDocument();
-
-	const {
-		summary,
-		summaryLoading,
-		summaryProgress,
-		summaryError,
-		homeSummaryLoading,
-		homeSummaryReady,
-		handleGenerateSummary,
-		handleHomeSummaryClick,
-	} = useSummary(documentContent, () => {});
-
-	const {
-		chatMessages,
-		setChatMessages,
-		chatLoading,
-		chatError,
-		handleChatSubmit,
-	} = useChat(documentContent);
-
-	const {
-		isBrainstormModalVisible,
-		setIsBrainstormModalVisible,
-		brainstormMessages,
-		setBrainstormMessages,
-		brainstormLoading,
-		handleBrainstormSubmit,
-	} = useBrainstorm();
-
-	const {
-		isDraftModalVisible,
-		setIsDraftModalVisible,
-		draftPrompt,
-		setDraftPrompt,
-		isDrafting,
-		handleDraftSubmit,
-		handleCloseDraftModal,
-	} = useDraft();
 
 	const {
 		activeView,
@@ -109,6 +68,44 @@ const AppContent: React.FC = () => {
 	} = useAppState();
 
 	const {
+		summary,
+		summaryLoading,
+		summaryProgress,
+		summaryError,
+		homeSummaryLoading,
+		homeSummaryReady,
+		handleGenerateSummary,
+		handleHomeSummaryClick,
+	} = useSummary(documentContent, setActiveView);
+
+	const {
+		chatMessages,
+		setChatMessages,
+		chatLoading,
+		chatError,
+		handleChatSubmit,
+	} = useChat(documentContent);
+
+	const {
+		isBrainstormModalVisible,
+		setIsBrainstormModalVisible,
+		brainstormMessages,
+		setBrainstormMessages,
+		brainstormLoading,
+		handleBrainstormSubmit,
+	} = useBrainstorm();
+
+	const {
+		isDraftModalVisible,
+		setIsDraftModalVisible,
+		draftPrompt,
+		setDraftPrompt,
+		isDrafting,
+		handleDraftSubmit,
+		handleCloseDraftModal,
+	} = useDraft();
+
+	const {
 		parties,
 		setParties,
 		isLoadingParties,
@@ -116,27 +113,7 @@ const AppContent: React.FC = () => {
 		selectedParty,
 		setSelectedParty,
 		getTagColor,
-		loadParties,
 	} = useParties();
-
-	// Demo state
-	const [showDocumentSelector, setShowDocumentSelector] =
-		useState<boolean>(false);
-	const [currentDocument, setCurrentDocument] = useState<any>(null);
-
-	// Load demo document on mount
-	useEffect(() => {
-		if (!documentContent && DEMO_DOCUMENTS.length > 0) {
-			setShowDocumentSelector(true);
-		}
-	}, [documentContent]);
-
-	// Load parties when document content changes
-	useEffect(() => {
-		if (documentContent) {
-			loadParties(documentContent);
-		}
-	}, [documentContent, loadParties]);
 
 	const handleChangeParty = useCallback(() => {
 		setClauseAnalysis(null);
@@ -148,23 +125,73 @@ const AppContent: React.FC = () => {
 		});
 	}, [setClauseAnalysis, setSelectedParty, setClauseAnalysisCounts]);
 
-	const handleTextSelection = useCallback(
-		async (text: string) => {
-			setSelectedText(text);
-		},
-		[setSelectedText]
-	);
+	const handleTextSelection = useCallback(async () => {
+		try {
+			// Check if we're in Office environment and Word is available
+			if (
+				typeof window !== "undefined" &&
+				typeof Office !== "undefined" &&
+				Office.context &&
+				Office.context.document &&
+				typeof Word !== "undefined"
+			) {
+				await Word.run(async (context) => {
+					const selection = context.document.getSelection();
+					selection.load("text");
+					await context.sync();
+					const selectedContent = selection.text.trim();
+					setSelectedText(selectedContent);
+				});
+			} else {
+				// In browser environment, we can't get selected text from Word
+				// This is expected behavior
+				console.log("Not in Office environment - text selection not available");
+			}
+		} catch (error) {
+			console.error("Error getting selected text:", error);
+			setSelectedText("");
+		}
+	}, [setSelectedText]);
+
+	useEffect(() => {
+		const handleSelectionChange = () => {
+			handleTextSelection();
+		};
+
+		// Add event handler when component mounts - only in Office environment
+		if (
+			typeof window !== "undefined" &&
+			typeof Office !== "undefined" &&
+			Office.context &&
+			Office.context.document &&
+			typeof Word !== "undefined"
+		) {
+			try {
+				Office.context.document.addHandlerAsync(
+					Office.EventType.DocumentSelectionChanged,
+					handleSelectionChange
+				);
+
+				// Remove event handler when component unmounts
+				return () => {
+					try {
+						Office.context.document.removeHandlerAsync(
+							Office.EventType.DocumentSelectionChanged,
+							handleSelectionChange
+						);
+					} catch (error) {
+						console.log("Error removing Office event handler:", error);
+					}
+				};
+			} catch (error) {
+				console.log("Error adding Office event handler:", error);
+			}
+		}
+	}, [handleTextSelection]);
 
 	const handleLogout = (): void => {
 		logout();
 		message.success("Successfully logged out");
-	};
-
-	const handleDocumentSelect = (document: any): void => {
-		// In a real app, this would load the document content
-		setCurrentDocument(document);
-		setShowDocumentSelector(false);
-		message.success(`Loaded: ${document.title}`);
 	};
 
 	const handleExplain = async (): Promise<void> => {
@@ -236,8 +263,31 @@ const AppContent: React.FC = () => {
 		if (!generatedRedraft) return;
 
 		try {
-			// In a real app, this would update the document
-			message.success("Redraft applied successfully");
+			// Check if we're in Office environment and Word is available
+			if (
+				typeof window !== "undefined" &&
+				typeof Office !== "undefined" &&
+				Office.context &&
+				Office.context.document &&
+				typeof Word !== "undefined"
+			) {
+				await Word.run(async (context) => {
+					// Get the selected text
+					const selection = context.document.getSelection();
+					selection.load("text");
+					await context.sync();
+
+					// Replace the selected text with the redrafted version
+					selection.insertText(
+						generatedRedraft.redraftedText,
+						Word.InsertLocation.replace
+					);
+					await context.sync();
+				});
+			} else {
+				// In browser environment, just show success message
+				console.log("Not in Office environment - redraft applied in UI only");
+			}
 
 			setRedraftedTexts((prev) => {
 				const newMap = new Map(prev);
@@ -256,6 +306,7 @@ const AppContent: React.FC = () => {
 				return newMap;
 			});
 			setRedraftContent("");
+			message.success("Redraft applied successfully");
 		} catch (error) {
 			console.error("Error accepting redraft:", error);
 			message.error("Failed to apply redraft");
@@ -267,6 +318,24 @@ const AppContent: React.FC = () => {
 
 		try {
 			setIsAddingComment(true);
+
+			// Check if we're in Office environment and Word is available
+			if (
+				typeof window !== "undefined" &&
+				typeof Office !== "undefined" &&
+				Office.context &&
+				Office.context.document &&
+				typeof Word !== "undefined"
+			) {
+				await Word.run(async (context) => {
+					const selection = context.document.getSelection();
+					selection.insertComment(commentDraft.text);
+					await context.sync();
+				});
+			} else {
+				// In browser environment, just add to UI
+				console.log("Not in Office environment - comment added to UI only");
+			}
 
 			const newComment = {
 				id: Date.now().toString(),
@@ -315,17 +384,6 @@ const AppContent: React.FC = () => {
 		setRedraftReviewStates(states);
 	};
 
-	if (showDocumentSelector) {
-		return (
-			<DocumentSelector
-				documents={DEMO_DOCUMENTS}
-				scenarios={DEMO_SCENARIOS}
-				onDocumentSelect={handleDocumentSelect}
-				onTextSelect={handleTextSelection}
-			/>
-		);
-	}
-
 	return (
 		<Layout className="h-screen">
 			<div className="flex justify-between items-center p-4 bg-white border-b">
@@ -353,18 +411,10 @@ const AppContent: React.FC = () => {
 				<div className="flex items-center gap-4">
 					<Timer />
 					<Button
-						onClick={() => setShowDocumentSelector(true)}
-						type="default"
-						className="hover:bg-blue-50"
-					>
-						Switch Document
-					</Button>
-					<Button
 						onClick={handleLogout}
 						type="link"
 						danger
 						className="hover:text-red-600"
-						icon={<LogoutOutlined />}
 					>
 						Logout
 					</Button>
@@ -447,7 +497,6 @@ const AppContent: React.FC = () => {
 					isDrafting={isDrafting}
 					handleDraftSubmit={handleDraftSubmit}
 					handleCloseDraftModal={handleCloseDraftModal}
-					onTextSelect={handleTextSelection}
 				/>
 			</Content>
 		</Layout>

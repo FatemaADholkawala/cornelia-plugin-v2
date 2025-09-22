@@ -88,7 +88,6 @@ interface HomeViewProps {
 	isDrafting: boolean;
 	handleDraftSubmit: () => void;
 	handleCloseDraftModal: () => void;
-	onTextSelect: (text: string) => void;
 }
 
 const HomeView: React.FC<HomeViewProps> = ({
@@ -146,7 +145,6 @@ const HomeView: React.FC<HomeViewProps> = ({
 	isDrafting,
 	handleDraftSubmit,
 	handleCloseDraftModal,
-	onTextSelect,
 }) => {
 	return (
 		<div className="flex flex-col h-full space-y-4 py-4">

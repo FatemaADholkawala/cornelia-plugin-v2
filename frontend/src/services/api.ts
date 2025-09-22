@@ -84,12 +84,9 @@ export const authApi = {
 		try {
 			const response = await api.post("/token/", { username, password });
 			if (response.data.access) {
-				const tokens: AuthTokens = {
-					access: response.data.access,
-					refresh: response.data.refresh,
-				};
-				storeTokens(tokens);
-				return { success: true, tokens };
+				// Store the entire response data as tokens (matching original project)
+				storeTokens(response.data);
+				return { success: true, tokens: response.data };
 			}
 			return { success: false, error: "Invalid credentials" };
 		} catch (error: any) {

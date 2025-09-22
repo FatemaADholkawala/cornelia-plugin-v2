@@ -98,7 +98,6 @@ interface MainContentProps {
 	isDrafting: boolean;
 	handleDraftSubmit: () => void;
 	handleCloseDraftModal: () => void;
-	onTextSelect: (text: string) => void;
 }
 
 const MainContent: React.FC<MainContentProps> = (props) => {
