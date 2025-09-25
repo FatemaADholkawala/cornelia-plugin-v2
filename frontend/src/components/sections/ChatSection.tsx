@@ -1,10 +1,8 @@
 "use client";
 
 import React from "react";
-import { Button, Typography } from "antd";
-import { MessageOutlined, ArrowRightOutlined } from "@ant-design/icons";
-
-const { Text } = Typography;
+import { Button } from "antd";
+import { MessageOutlined } from "@ant-design/icons";
 
 interface ChatSectionProps {
 	setActiveView: (view: any) => void;
@@ -12,38 +10,22 @@ interface ChatSectionProps {
 
 const ChatSection: React.FC<ChatSectionProps> = ({ setActiveView }) => {
 	return (
-		<div className="p-6">
-			<div className="flex items-center justify-between mb-4">
-				<div className="flex items-center gap-2">
-					<MessageOutlined className="text-xl text-green-600" />
-					<Text strong className="text-lg">
-						Chat with Cornelia
-					</Text>
+		<div className="p-3">
+			<div className="flex items-center justify-between">
+				<div>
+					<h3 className="text-sm font-semibold text-gray-900 m-0">
+						Ask Cornelia
+					</h3>
+					<p className="text-xs text-gray-500 mt-0.5">Get instant answers</p>
 				</div>
 				<Button
-					type="link"
-					icon={<ArrowRightOutlined />}
+					type="primary"
+					className="flex items-center gap-1.5 !px-4 !h-8 rounded-full bg-blue-500 hover:bg-blue-600 text-sm"
+					icon={<MessageOutlined />}
 					onClick={() => setActiveView("chat")}
-					className="text-green-600 hover:text-green-700"
 				>
-					Open Chat
+					Chat
 				</Button>
-			</div>
-
-			<div className="min-h-[120px] flex items-center justify-center">
-				<div className="text-center">
-					<MessageOutlined className="text-4xl text-gray-300 mb-2" />
-					<Text type="secondary">Ask questions about your document</Text>
-					<div className="mt-3">
-						<Button
-							type="primary"
-							onClick={() => setActiveView("chat")}
-							className="bg-green-600 hover:bg-green-700 border-green-600"
-						>
-							Start Chat
-						</Button>
-					</div>
-				</div>
 			</div>
 		</div>
 	);

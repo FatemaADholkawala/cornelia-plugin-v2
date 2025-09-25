@@ -1,12 +1,8 @@
 "use client";
 
 import React from "react";
-import { Card, Button, Typography, Input, Space } from "antd";
-import {
-	CommentOutlined,
-	CloseOutlined,
-	SendOutlined,
-} from "@ant-design/icons";
+import { Button, Typography, Input } from "antd";
+import { CloseOutlined, CheckOutlined } from "@ant-design/icons";
 import { CommentDraft } from "@/types";
 
 const { TextArea } = Input;
@@ -30,59 +26,57 @@ const CommentPreview: React.FC<CommentPreviewProps> = ({
 	if (!comment) return null;
 
 	return (
-		<div className="px-4">
-			<Card className="border-purple-200 bg-purple-50">
-				<div className="flex items-start justify-between mb-4">
-					<div className="flex items-center gap-2">
-						<CommentOutlined className="text-purple-600 text-xl" />
-						<Text strong className="text-lg text-purple-800">
-							Add Comment
-						</Text>
-					</div>
-					<Button
-						type="text"
-						icon={<CloseOutlined />}
-						onClick={onClose}
-						className="text-gray-500 hover:text-gray-700"
-					/>
-				</div>
-
-				<div className="space-y-4">
-					<div>
-						<Text strong className="text-gray-700">
-							Your Comment:
-						</Text>
-						<div className="mt-2">
-							<TextArea
-								value={comment.text}
-								onChange={onChange}
-								placeholder="Enter your comment about the selected text..."
-								rows={4}
-								className="w-full"
-								disabled={isLoading}
-							/>
+		<div className="px-4 mt-4">
+			<div className="bg-white rounded-xl shadow-md p-5 border border-gray-200 hover:shadow-lg transition-shadow duration-200">
+				<div className="flex flex-col gap-3">
+					<div className="flex items-center justify-between border-b border-gray-100 pb-2">
+						<div className="flex items-center gap-2">
+							<div className="w-2 h-2 rounded-full bg-blue-500"></div>
+							<Text type="secondary" className="text-sm font-medium">
+								New Comment
+							</Text>
 						</div>
+						<Button
+							type="text"
+							size="small"
+							className="!text-gray-400 hover:!text-red-500 transition-colors duration-200"
+							icon={<CloseOutlined />}
+							onClick={onClose}
+						/>
 					</div>
-
-					<div className="flex justify-end">
-						<Space>
-							<Button onClick={onClose} disabled={isLoading}>
-								Cancel
-							</Button>
-							<Button
-								type="primary"
-								icon={<SendOutlined />}
-								onClick={onSubmit}
-								loading={isLoading}
-								disabled={!comment.text.trim() || isLoading}
-								className="bg-purple-600 hover:bg-purple-700 border-purple-600"
-							>
-								Add Comment
-							</Button>
-						</Space>
+					<div className="bg-gray-50 rounded-lg p-4 border border-gray-100 focus-within:border-blue-200 focus-within:ring-1 focus-within:ring-blue-100 transition-all duration-200">
+						<TextArea
+							value={comment.text}
+							onChange={onChange}
+							onKeyPress={(e) => {
+								if (e.key === "Enter" && !e.shiftKey) {
+									e.preventDefault();
+									if (comment.text.trim()) {
+										onSubmit();
+									}
+								}
+							}}
+							placeholder="Type your comment here..."
+							autoFocus
+							className="mt-1 border-none focus:shadow-none bg-transparent resize-none"
+							rows={4}
+						/>
+					</div>
+					<div className="flex justify-end mt-1">
+						<Button
+							type="primary"
+							size="middle"
+							icon={<CheckOutlined />}
+							loading={isLoading}
+							disabled={!comment.text.trim()}
+							onClick={onSubmit}
+							className="hover:scale-105 transition-transform duration-200"
+						>
+							Add Comment
+						</Button>
 					</div>
 				</div>
-			</Card>
+			</div>
 		</div>
 	);
 };

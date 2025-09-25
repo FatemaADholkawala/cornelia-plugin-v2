@@ -1,16 +1,15 @@
 "use client";
 
-import React from "react";
-import { Modal, Input, Button, Typography, Spin } from "antd";
-import { FileTextOutlined } from "@ant-design/icons";
+import React, { useState } from "react";
+import { Modal, Button, Input, Radio } from "antd";
+import { FileTextOutlined, CheckCircleOutlined } from "@ant-design/icons";
 
 const { TextArea } = Input;
-const { Text } = Typography;
 
 interface DraftModalProps {
 	isVisible: boolean;
 	onClose: () => void;
-	onDraft: () => void;
+	onDraft: (location: string) => void;
 	draftPrompt: string;
 	setDraftPrompt: (prompt: string) => void;
 }
@@ -22,51 +21,80 @@ const DraftModal: React.FC<DraftModalProps> = ({
 	draftPrompt,
 	setDraftPrompt,
 }) => {
+	const [draftLocation, setDraftLocation] = useState("current"); // 'current' or 'new'
+
+	const handleDraft = () => {
+		onDraft(draftLocation);
+	};
+
 	return (
 		<Modal
 			title={
-				<div className="flex items-center gap-2">
-					<FileTextOutlined className="text-green-600" />
-					<span>Draft New Content</span>
+				<div className="modal-title">
+					<FileTextOutlined className="modal-icon mr-2" />
+					<span>Draft with Cornelia</span>
 				</div>
 			}
 			open={isVisible}
 			onCancel={onClose}
-			footer={[
-				<Button key="cancel" onClick={onClose}>
-					Cancel
-				</Button>,
+			footer={
 				<Button
-					key="draft"
 					type="primary"
-					onClick={onDraft}
+					icon={<CheckCircleOutlined />}
+					onClick={handleDraft}
 					disabled={!draftPrompt.trim()}
-					className="bg-green-600 hover:bg-green-700 border-green-600"
 				>
 					Generate Draft
-				</Button>,
-			]}
-			width={700}
+				</Button>
+			}
+			width={360}
 			className="draft-modal"
+			closeIcon={null}
 		>
 			<div className="space-y-4">
-				<div>
-					<Text strong className="text-gray-700">
-						Describe what you want to draft:
-					</Text>
-				</div>
 				<TextArea
+					rows={5}
 					value={draftPrompt}
 					onChange={(e) => setDraftPrompt(e.target.value)}
-					placeholder="Enter your requirements for the new content... (e.g., 'Draft a confidentiality clause for a software development agreement', 'Create a payment terms section for a consulting contract')"
-					rows={8}
-					className="w-full"
+					onKeyPress={(e) => {
+						if (e.key === "Enter" && !e.shiftKey) {
+							e.preventDefault();
+							if (draftPrompt.trim()) {
+								handleDraft();
+							}
+						}
+					}}
+					placeholder="What would you like to draft? Describe the content, tone, and style you need..."
+					className="draft-textarea"
+					autoFocus
 				/>
-				<div className="text-sm text-gray-500">
-					<Text type="secondary">
-						Be specific about the type of content, context, and any particular
-						requirements you have.
-					</Text>
+
+				<div className="mt-4">
+					<div className="text-sm text-gray-600 mb-2">
+						Where would you like to insert the draft?
+					</div>
+					<Radio.Group
+						value={draftLocation}
+						onChange={(e) => setDraftLocation(e.target.value)}
+						className="w-full space-y-2"
+					>
+						<Radio value="current" className="w-full">
+							<div className="flex flex-col">
+								<span className="font-medium">Current Document</span>
+								<span className="text-xs text-gray-500">
+									Insert at current cursor position
+								</span>
+							</div>
+						</Radio>
+						<Radio value="new" className="w-full">
+							<div className="flex flex-col">
+								<span className="font-medium">New Document</span>
+								<span className="text-xs text-gray-500">
+									Create and open in a new window
+								</span>
+							</div>
+						</Radio>
+					</Radio.Group>
 				</div>
 			</div>
 		</Modal>

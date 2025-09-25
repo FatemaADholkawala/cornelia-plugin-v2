@@ -1,11 +1,11 @@
 "use client";
 
 import React from "react";
-import { Card, Button, Typography, Divider } from "antd";
-import { InfoCircleOutlined, CloseOutlined } from "@ant-design/icons";
+import { Button, Typography } from "antd";
+import { CloseOutlined } from "@ant-design/icons";
 import { Explanation } from "@/types";
 
-const { Text, Paragraph } = Typography;
+const { Text } = Typography;
 
 interface ExplanationPreviewProps {
 	explanation: Explanation | null;
@@ -19,51 +19,28 @@ const ExplanationPreview: React.FC<ExplanationPreviewProps> = ({
 	if (!explanation) return null;
 
 	return (
-		<div className="px-4">
-			<Card className="border-blue-200 bg-blue-50">
-				<div className="flex items-start justify-between mb-4">
-					<div className="flex items-center gap-2">
-						<InfoCircleOutlined className="text-blue-600 text-xl" />
-						<Text strong className="text-lg text-blue-800">
+		<div className="px-4 mt-2">
+			<div className="bg-gray-50 rounded-xl shadow-sm p-4 border border-gray-100">
+				<div className="flex flex-col gap-2">
+					<div className="flex items-center justify-between">
+						<Text type="secondary" className="text-xs">
 							Explanation
 						</Text>
+						<Button
+							type="text"
+							size="small"
+							className="!text-gray-400 hover:!text-gray-600"
+							icon={<CloseOutlined />}
+							onClick={onClose}
+						/>
 					</div>
-					<Button
-						type="text"
-						icon={<CloseOutlined />}
-						onClick={onClose}
-						className="text-gray-500 hover:text-gray-700"
-					/>
-				</div>
-
-				<div className="space-y-4">
-					<div>
-						<Text strong className="text-gray-700">
-							Selected Text:
-						</Text>
-						<div className="mt-1 p-3 bg-white rounded border-l-4 border-blue-500">
-							<Text className="italic text-gray-700">"{explanation.text}"</Text>
+					<div className="bg-white rounded p-3 border border-gray-100">
+						<div className="mt-1 text-sm border-l-2 border-green-400 pl-3">
+							{explanation.explanation}
 						</div>
 					</div>
-
-					<Divider className="my-4" />
-
-					<div>
-						<Text strong className="text-gray-700">
-							Analysis:
-						</Text>
-						<div className="mt-2">
-							<Paragraph className="text-gray-700 whitespace-pre-wrap">
-								{explanation.explanation}
-							</Paragraph>
-						</div>
-					</div>
-
-					<div className="text-xs text-gray-500">
-						Generated at: {new Date(explanation.timestamp).toLocaleString()}
-					</div>
 				</div>
-			</Card>
+			</div>
 		</div>
 	);
 };
