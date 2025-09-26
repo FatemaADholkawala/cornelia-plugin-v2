@@ -76,9 +76,15 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
 					await context.sync();
 
 					if (searchResults.items.length > 0) {
-						const firstResult = searchResults.items[0];
-						firstResult.select();
-						await context.sync();
+						searchResults.items[0].select();
+						searchResults.items[0].scrollIntoView();
+
+						setTimeout(async () => {
+							await Word.run(async (context) => {
+								searchResults.items[0].font.highlightColor = "None";
+								await context.sync();
+							});
+						}, 2000);
 					}
 				});
 			} else {
@@ -89,113 +95,245 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
 		}
 	};
 
-	const handleSubmit = async (): Promise<void> => {
-		if (!input.trim() || isLoading) return;
+	const renderInlineFormatting = (text: string): React.ReactNode => {
+		if (!text) return null;
 
-		const userMessage: ChatMessage = {
-			id: `user-${Date.now()}`,
-			content: input,
-			sender: "user",
-			timestamp: new Date().toISOString(),
-		};
+		const parts = text.split(/(\*\*\*\*.*?\*\*\*\*|\*\*.*?\*\*|\[\[.*?\]\])/g);
 
-		setMessages([...messages, userMessage]);
-		setInput("");
+		return parts.map((part, index) => {
+			// Handle bold text with 4 asterisks
+			if (part?.match(/^\*\*\*\*.*\*\*\*\*$/)) {
+				return (
+					<strong
+						key={`bold4-${index}`}
+						className="text-blue-700 font-semibold"
+					>
+						{part.slice(4, -4)}
+					</strong>
+				);
+			}
 
-		try {
-			await onSubmit(input, selectedText || "", "", documentContent);
-		} catch (error) {
-			console.error("Error submitting message:", error);
-		}
+			// Handle bold text with 2 asterisks
+			if (part?.match(/^\*\*.*\*\*$/)) {
+				return (
+					<strong
+						key={`bold2-${index}`}
+						className="text-blue-700 font-semibold"
+					>
+						{part.slice(2, -2)}
+					</strong>
+				);
+			}
+
+			// Handle [[citations]]
+			if (part?.match(/\[\[(.*?)\]\]/)) {
+				const citationText = part.match(/\[\[(.*?)\]\]/)?.[1];
+				return (
+					<a
+						key={`citation-${index}`}
+						href="#"
+						className="text-blue-600 hover:text-blue-800 hover:underline transition-colors duration-200"
+						onClick={(e) => {
+							e.preventDefault();
+							if (citationText) {
+								searchInDocument(citationText);
+							}
+						}}
+					>
+						{citationText}
+					</a>
+				);
+			}
+
+			return part;
+		});
 	};
 
-	const handleKeyPress = (e: React.KeyboardEvent): void => {
-		if (e.key === "Enter" && !e.shiftKey) {
-			e.preventDefault();
-			handleSubmit();
-		}
+	const renderMessageContent = (
+		content: string,
+		isUserMessage: boolean
+	): React.ReactNode => {
+		if (!content) return null;
+
+		// Replace citations like [[text]]{{None}} with just [[text]]
+		content = content.replace(/\{\{None\}\}/g, "");
+
+		// Split content into sections (paragraphs, headings, bullet points)
+		const sections = content.split(/\n\n/).filter(Boolean);
+
+		return sections.map((section, sIndex) => {
+			if (section.startsWith("**")) {
+				// Format headings (bold)
+				return (
+					<h2
+						key={sIndex}
+						className={`font-bold text-lg mb-2 ${
+							isUserMessage ? "text-white" : "text-blue-700"
+						}`}
+					>
+						{section.replace(/\*\*/g, "")}
+					</h2>
+				);
+			}
+
+			if (section.startsWith("*")) {
+				// Format bullet points
+				const listItems = section.split("\n").map((item, iIndex) => (
+					<li
+						key={iIndex}
+						className={`ml-4 list-disc ${isUserMessage ? "text-white" : ""}`}
+					>
+						{renderInlineFormatting(item.replace(/^\*\s*/, ""))}
+					</li>
+				));
+
+				return (
+					<ul key={sIndex} className="mb-4">
+						{listItems}
+					</ul>
+				);
+			}
+
+			// Default: Normal paragraph
+			return (
+				<p
+					key={sIndex}
+					className={`mb-4 leading-relaxed ${
+						isUserMessage ? "text-white" : "text-gray-800"
+					}`}
+				>
+					{renderInlineFormatting(section)}
+				</p>
+			);
+		});
 	};
 
 	useEffect(() => {
-		if (messagesEndRef.current) {
-			messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+		if (messages.length === 0) {
+			setMessages([
+				{
+					id: "initial-tip",
+					role: "assistant",
+					content:
+						"Hi! I can help you analyze this document. What would you like to know?",
+					isInitialTip: true,
+					timestamp: new Date().toLocaleTimeString(),
+					sender: "assistant",
+				},
+			]);
 		}
+	}, [messages.length, setMessages]);
+
+	const scrollToBottom = () => {
+		messagesEndRef.current?.scrollIntoView({
+			behavior: "smooth",
+			block: "start",
+		});
+	};
+
+	useEffect(() => {
+		scrollToBottom();
 	}, [messages]);
 
+	const handleSubmit = async (e: React.FormEvent): Promise<void> => {
+		e.preventDefault();
+		if (!input.trim() || isLoading) return;
+
+		const messageText = input.trim();
+		setInput("");
+		await onSubmit(messageText, selectedText || "", "", documentContent);
+	};
+
 	return (
-		<div className="flex flex-col h-full bg-white">
-			{/* Messages */}
-			<div
-				ref={chatContainerRef}
-				className="flex-1 overflow-y-auto p-4 space-y-4"
-			>
-				{messages.map((message) => (
-					<div
-						key={message.id}
-						className={`flex ${
-							message.sender === "user" ? "justify-end" : "justify-start"
-						}`}
-					>
+		<div className="flex flex-col h-full bg-gray-50">
+			<div className="flex-1 overflow-y-auto p-4 space-y-4">
+				{messages.map((message, index) => {
+					const isSystemMessage = message.isInitialTip || message.isError;
+
+					return (
 						<div
-							className={`max-w-[80%] rounded-lg px-3 py-2 ${
-								message.sender === "user"
-									? "bg-blue-500 text-white"
-									: "bg-gray-100 text-gray-800"
+							key={message.id || index}
+							className={`animate-fadeIn ${
+								isSystemMessage
+									? "flex justify-center"
+									: message.role === "user"
+									? "flex flex-col items-end"
+									: "flex flex-col items-start"
 							}`}
+							ref={index === messages.length - 1 ? messagesEndRef : null}
 						>
-							<div className="text-sm">{message.content}</div>
-							<div
-								className={`text-xs mt-1 ${
-									message.sender === "user" ? "text-blue-100" : "text-gray-500"
-								}`}
-							>
-								{formatTimestamp(message.timestamp)}
-							</div>
+							{isSystemMessage ? (
+								<div
+									className="flex items-center gap-2 px-6 py-2.5 bg-white rounded-full 
+                    text-xs font-medium text-gray-600 border border-gray-200 shadow-sm"
+								>
+									<span className="w-4 h-4">ℹ</span>
+									{message.content}
+								</div>
+							) : (
+								<div className="space-y-1.5 max-w-[85%] group">
+									<div
+										className={`p-4 rounded-2xl ${
+											message.role === "user"
+												? "bg-blue-600 text-white shadow-sm"
+												: "bg-white text-gray-800 shadow-md"
+										}`}
+										style={{ paddingTop: "12px", paddingBottom: "12px" }} // Ensure symmetric padding
+									>
+										<div className="text-sm prose prose-sm max-w-none">
+											{renderMessageContent(
+												message.content,
+												message.role === "user"
+											)}
+										</div>
+									</div>
+									<div
+										className={`text-xs opacity-70 group-hover:opacity-100 transition-opacity ${
+											message.role === "user"
+												? "text-right text-blue-700"
+												: "text-left text-gray-600"
+										}`}
+									>
+										{formatTimestamp(message.timestamp)}
+									</div>
+								</div>
+							)}
 						</div>
-					</div>
-				))}
-
+					);
+				})}
 				{isLoading && (
-					<div className="flex justify-start">
-						<div className="bg-gray-100 rounded-lg px-3 py-2 flex items-center space-x-2">
-							<Spin size="small" />
-							<span className="text-sm text-gray-600">Thinking...</span>
-						</div>
+					<div className="flex justify-center items-center p-4">
+						<Spin size="small" />
 					</div>
 				)}
-
-				{error && (
-					<div className="flex justify-start">
-						<div className="bg-red-100 border border-red-300 rounded-lg px-3 py-2">
-							<div className="text-sm text-red-800">{error}</div>
-						</div>
-					</div>
-				)}
-
-				<div ref={messagesEndRef} />
 			</div>
 
-			{/* Input */}
-			<div className="border-t p-4">
-				<div className="flex space-x-2">
+			<div className="border-t p-4 bg-white shadow-sm">
+				<form onSubmit={handleSubmit} className="flex items-center gap-3">
 					<Input
 						value={input}
 						onChange={(e) => setInput(e.target.value)}
-						onKeyPress={handleKeyPress}
-						placeholder="Ask about the selected text or document..."
-						disabled={isLoading}
-						className="flex-1"
+						placeholder={
+							isLoading
+								? "Waiting for response..."
+								: "Type your question here..."
+						}
+						className="flex-grow rounded-full border-gray-200 hover:border-gray-300 focus:border-blue-500 
+        shadow-sm transition-colors duration-200"
 					/>
 					<Button
-						type="primary"
+						type="text"
+						htmlType="submit"
 						icon={<SendOutlined />}
-						onClick={handleSubmit}
-						disabled={!input.trim() || isLoading}
-						loading={isLoading}
-					>
-						Send
-					</Button>
-				</div>
+						disabled={isLoading || !input.trim()}
+						className={`flex items-center justify-center !p-2
+        transition-all duration-200 hover:scale-105 ${
+					isLoading || !input.trim()
+						? "opacity-50 cursor-not-allowed"
+						: "text-blue-600 hover:text-blue-700"
+				}`}
+					/>
+				</form>
 			</div>
 		</div>
 	);

@@ -10,11 +10,7 @@ export const useChat = (documentContent: string) => {
 	const [chatError, setChatError] = useState<string | null>(null);
 
 	const handleChatSubmit = useCallback(
-		async (
-			message: string,
-			selectedText?: string,
-			documentContent?: string
-		): Promise<void> => {
+		async (message: string): Promise<void> => {
 			const trimmedInput = message.trim();
 			if (!trimmedInput || chatLoading) return;
 

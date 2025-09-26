@@ -120,17 +120,7 @@ const MainContent: React.FC<MainContentProps> = (props) => {
 		case "analysis":
 			return <AnalysisView {...props} />;
 		case "chat":
-			return (
-				<ChatWindowView
-					documentContent={props.documentContent}
-					messages={props.chatMessages}
-					setMessages={props.setChatMessages}
-					isLoading={props.chatLoading}
-					error={props.chatError}
-					onSubmit={props.handleChatSubmit}
-					selectedText={props.selectedText}
-				/>
-			);
+			return <ChatWindowView {...props} />;
 		case "contextual-intelligence":
 			return <ContextualIntelligenceView {...props} />;
 		case "home":

@@ -316,7 +316,7 @@ export const analysisApi = {
 			const response = await api.post("/plugin/analyze_parties/", {
 				text: text,
 			});
-			return response.data.success ? response.data.parties : [];
+			return response.data.success ? response.data.parties : null;
 		} catch (error) {
 			console.error("Error in party analysis:", error);
 			throw error;

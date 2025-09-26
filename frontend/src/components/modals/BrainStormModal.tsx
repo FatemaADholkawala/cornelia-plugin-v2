@@ -4,7 +4,7 @@ import React from "react";
 import { Modal, Typography } from "antd";
 import { BulbOutlined } from "@ant-design/icons";
 import { ChatMessage } from "@/types";
-import ChatWindow from "../views/ChatWindowView";
+import ChatWindow from "../views/ChatWindow";
 
 const { Text } = Typography;
 
