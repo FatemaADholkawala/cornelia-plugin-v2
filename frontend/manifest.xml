@@ -25,7 +25,7 @@
     </Hosts>
 
     <DefaultSettings>
-        <SourceLocation DefaultValue="https://localhost:3002/taskpane/"/>
+        <SourceLocation DefaultValue="https://localhost:3002/taskpane"/>
     </DefaultSettings>
 
     <Permissions>ReadWriteDocument</Permissions>
@@ -79,7 +79,7 @@
             </bt:Images>
             <bt:Urls>
                 <bt:Url id="Commands.Url" DefaultValue="https://localhost:3002/commands"/>
-                <bt:Url id="Taskpane.Url" DefaultValue="https://localhost:3002/taskpane/"/>
+                <bt:Url id="Taskpane.Url" DefaultValue="https://localhost:3002/taskpane"/>
                 <bt:Url id="GetStarted.LearnMoreUrl" DefaultValue="https://cornelialegal.ai"/>
             </bt:Urls>
             <bt:ShortStrings>
