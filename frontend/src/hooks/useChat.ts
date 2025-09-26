@@ -10,55 +10,77 @@ export const useChat = (documentContent: string) => {
 	const [chatError, setChatError] = useState<string | null>(null);
 
 	const handleChatSubmit = useCallback(
-		async (message: string): Promise<void> => {
-			if (!message.trim()) return;
+		async (
+			message: string,
+			selectedText?: string,
+			documentContent?: string
+		): Promise<void> => {
+			const trimmedInput = message.trim();
+			if (!trimmedInput || chatLoading) return;
 
-			const userMessage: ChatMessage = {
-				id: Date.now().toString(),
-				content: message,
-				role: "user",
-				timestamp: new Date().toISOString(),
-			};
+			const timestamp = new Date().toLocaleTimeString();
 
-			setChatMessages((prev) => [...prev, userMessage]);
+			// Append user message immediately
+			setChatMessages((prev) => [
+				...prev,
+				{
+					id: Date.now().toString(),
+					role: "user",
+					content: trimmedInput,
+					timestamp,
+				},
+			]);
+
 			setChatLoading(true);
 			setChatError(null);
 
 			try {
-				const response = await analysisApi.performAnalysis(
+				// Format the conversation history with last 20 messages
+				const conversationHistory = chatMessages
+					.slice(-20) // Take only the last 20 messages
+					.map((msg) => `${msg.role}: ${msg.content}`)
+					.join("\n");
+
+				const result = await analysisApi.performAnalysis(
 					"ask",
-					message,
-					"chat.docx"
+					`Document Content:\n${documentContent}\n\nConversation History:\n${conversationHistory}\n\nQuestion: ${trimmedInput}`,
+					"document"
 				);
 
-				const assistantMessage: ChatMessage = {
-					id: (Date.now() + 1).toString(),
-					content:
-						response ||
-						"I apologize, but I couldn't process your request at this time.",
-					role: "assistant",
-					timestamp: new Date().toISOString(),
-				};
+				if (!result) {
+					throw new Error("Empty response from performAnalysis");
+				}
 
-				setChatMessages((prev) => [...prev, assistantMessage]);
+				// Append assistant response
+				setChatMessages((prev) => [
+					...prev,
+					{
+						id: (Date.now() + 1).toString(),
+						role: "assistant",
+						content: result,
+						timestamp: new Date().toLocaleTimeString(),
+					},
+				]);
 			} catch (error: any) {
-				console.error("Error in chat:", error);
-				setChatError(error.message || "Failed to process your message");
+				console.error("Chat error:", error);
+				setChatError(error.message || "An unknown error occurred.");
 
-				const errorMessage: ChatMessage = {
-					id: (Date.now() + 1).toString(),
-					content:
-						"I apologize, but I encountered an error processing your request. Please try again.",
-					role: "assistant",
-					timestamp: new Date().toISOString(),
-				};
-
-				setChatMessages((prev) => [...prev, errorMessage]);
+				// Append error message
+				setChatMessages((prev) => [
+					...prev,
+					{
+						id: (Date.now() + 1).toString(),
+						role: "assistant",
+						content: "Sorry, I encountered an error. Please try again.",
+						timestamp: new Date().toLocaleTimeString(),
+						isError: true,
+					},
+				]);
 			} finally {
 				setChatLoading(false);
 			}
 		},
-		[]
+		[chatMessages, documentContent, chatLoading]
 	);
 
 	const clearChat = useCallback((): void => {

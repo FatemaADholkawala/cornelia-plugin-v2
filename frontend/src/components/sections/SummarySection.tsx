@@ -20,6 +20,7 @@ const SummarySection: React.FC<SummarySectionProps> = ({
 	summaryProgress,
 	homeSummaryReady,
 	handleHomeSummaryClick,
+	summary,
 	setActiveView,
 }) => {
 	const handleClick = async () => {

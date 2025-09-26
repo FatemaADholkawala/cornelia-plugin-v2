@@ -33,7 +33,7 @@ interface TimerProviderProps {
 
 export const TimerProvider: React.FC<TimerProviderProps> = ({ children }) => {
 	const [elapsedTime, setElapsedTime] = useState<number>(0);
-	const [isRunning, setIsRunning] = useState<boolean>(true);
+	const [isRunning, setIsRunning] = useState<boolean>(false);
 	const [startTime, setStartTime] = useState<number>(Date.now());
 
 	useEffect(() => {

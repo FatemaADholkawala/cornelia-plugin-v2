@@ -16,6 +16,7 @@ import HomeView from "./views/HomeView";
 import AnalysisView from "./views/AnalysisView";
 import ChatWindowView from "./views/ChatWindowView";
 import ContextualIntelligenceView from "./views/ContextualIntelligenceView";
+import DocumentSummaryView from "./views/DocumentSummaryView";
 
 interface MainContentProps {
 	activeView: ActiveView | null;
@@ -104,10 +105,32 @@ const MainContent: React.FC<MainContentProps> = (props) => {
 	const { activeView } = props;
 
 	switch (activeView) {
+		case "summary":
+			return (
+				<DocumentSummaryView
+					documentContent={props.documentContent}
+					summary={props.summary}
+					isLoading={props.summaryLoading}
+					progress={props.summaryProgress}
+					error={props.summaryError}
+					onGenerateSummary={props.handleGenerateSummary}
+					setActiveView={props.setActiveView}
+				/>
+			);
 		case "analysis":
 			return <AnalysisView {...props} />;
 		case "chat":
-			return <ChatWindowView {...props} />;
+			return (
+				<ChatWindowView
+					documentContent={props.documentContent}
+					messages={props.chatMessages}
+					setMessages={props.setChatMessages}
+					isLoading={props.chatLoading}
+					error={props.chatError}
+					onSubmit={props.handleChatSubmit}
+					selectedText={props.selectedText}
+				/>
+			);
 		case "contextual-intelligence":
 			return <ContextualIntelligenceView {...props} />;
 		case "home":

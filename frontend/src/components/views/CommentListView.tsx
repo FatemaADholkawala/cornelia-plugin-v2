@@ -289,7 +289,7 @@ const CommentListView = React.memo(
 			<Card
 				className={`rounded-lg shadow-sm hover:shadow transition-all duration-200 
         ${isResolved ? "bg-gray-50/50" : "bg-white"}`}
-				bodyStyle={{ padding: "12px" }}
+				styles={{ body: { padding: "12px" } }}
 			>
 				<div className="flex justify-between items-start mb-2">
 					<div className="flex items-start space-x-2">
@@ -302,7 +302,7 @@ const CommentListView = React.memo(
 							</Text>
 							<Text type="secondary" className="text-xs flex items-center">
 								<ClockCircleOutlined className="mr-1 text-xs" />
-								{formatDate(comment.timestamp)}
+								{formatDate(comment.date)}
 							</Text>
 						</div>
 					</div>
@@ -328,7 +328,7 @@ const CommentListView = React.memo(
           transition-colors duration-200"
 					onClick={() => navigateToComment(comment.id)}
 				>
-					<Text className="text-gray-700 text-sm">{comment.text}</Text>
+					<Text className="text-gray-700 text-sm">{comment.content}</Text>
 				</div>
 
 				{comment.replies && comment.replies.length > 0 && (

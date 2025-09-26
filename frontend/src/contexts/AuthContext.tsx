@@ -36,14 +36,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
 	const checkAuthStatus = async (): Promise<void> => {
 		try {
-			const isAuth = await authApi.checkAuthStatus();
-			if (isAuth) {
+			// Check tokens directly like the original project
+			const tokens = authApi.getTokens();
+			if (tokens && !authApi.isTokenExpired(tokens.access)) {
 				setIsAuthenticated(true);
-				const userProfile = await authApi.getProfile();
-				setUser(userProfile);
+				try {
+					const userProfile = await authApi.getProfile();
+					setUser(userProfile);
+				} catch (error) {
+					console.error("Failed to fetch user profile:", error);
+				}
+			} else {
+				setIsAuthenticated(false);
+				setUser(null);
 			}
 		} catch (error) {
 			console.error("Failed to check auth status:", error);
+			setIsAuthenticated(false);
+			setUser(null);
 		} finally {
 			setIsLoading(false);
 		}

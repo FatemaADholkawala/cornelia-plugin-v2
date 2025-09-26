@@ -76,7 +76,7 @@ const AppContent: React.FC = () => {
 		homeSummaryReady,
 		handleGenerateSummary,
 		handleHomeSummaryClick,
-	} = useSummary(documentContent, setActiveView);
+	} = useSummary(documentContent);
 
 	const {
 		chatMessages,
@@ -113,6 +113,7 @@ const AppContent: React.FC = () => {
 		selectedParty,
 		setSelectedParty,
 		getTagColor,
+		loadParties,
 	} = useParties();
 
 	const handleChangeParty = useCallback(() => {
@@ -188,6 +189,13 @@ const AppContent: React.FC = () => {
 			}
 		}
 	}, [handleTextSelection]);
+
+	// Load parties when document content changes
+	useEffect(() => {
+		if (documentContent) {
+			loadParties(documentContent);
+		}
+	}, [documentContent, loadParties]);
 
 	const handleLogout = (): void => {
 		logout();

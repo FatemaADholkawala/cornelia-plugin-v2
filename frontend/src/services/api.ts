@@ -27,23 +27,23 @@ const api: AxiosInstance = axios.create({
 });
 
 // Token management
-const getTokens = (): AuthTokens | null => {
+export const getTokens = (): AuthTokens | null => {
 	if (typeof window === "undefined") return null;
 	const tokens = localStorage.getItem("cornelia_tokens");
 	return tokens ? JSON.parse(tokens) : null;
 };
 
-const storeTokens = (tokens: AuthTokens): void => {
+export const storeTokens = (tokens: AuthTokens): void => {
 	if (typeof window === "undefined") return;
 	localStorage.setItem("cornelia_tokens", JSON.stringify(tokens));
 };
 
-const clearTokens = (): void => {
+export const clearTokens = (): void => {
 	if (typeof window === "undefined") return;
 	localStorage.removeItem("cornelia_tokens");
 };
 
-const isTokenExpired = (token: string): boolean => {
+export const isTokenExpired = (token: string): boolean => {
 	try {
 		const payload = JSON.parse(atob(token.split(".")[1]));
 		return Date.now() >= payload.exp * 1000;
@@ -119,6 +119,12 @@ export const authApi = {
 			return false;
 		}
 	},
+
+	// Expose token management functions
+	getTokens,
+	storeTokens,
+	clearTokens,
+	isTokenExpired,
 };
 
 // Analysis API
@@ -301,6 +307,18 @@ export const analysisApi = {
 			return response.data.success ? response.data.result : "";
 		} catch (error) {
 			console.error("Error in draft text:", error);
+			throw error;
+		}
+	},
+
+	analyzeParties: async (text: string): Promise<Party[]> => {
+		try {
+			const response = await api.post("/plugin/analyze_parties/", {
+				text: text,
+			});
+			return response.data.success ? response.data.parties : [];
+		} catch (error) {
+			console.error("Error in party analysis:", error);
 			throw error;
 		}
 	},

@@ -10,6 +10,7 @@ import {
 } from "@ant-design/icons";
 import { ClauseAnalysis, Party, AnalysisCounts } from "@/types";
 import { analysisApi } from "@/services/api";
+import { parseAPIResponse } from "@/utils/apiUtils";
 
 interface ClauseAnalysisSectionProps {
 	clauseAnalysis: ClauseAnalysis | null;
@@ -94,12 +95,21 @@ const ClauseAnalysisSection: React.FC<ClauseAnalysisSectionProps> = ({
 			if (!result) {
 				throw new Error("No analysis results received");
 			}
+			const parsedResult = parseAPIResponse(result);
 
-			setClauseAnalysis(result);
+			if (
+				!parsedResult?.acceptable ||
+				!parsedResult?.risky ||
+				!parsedResult?.missing
+			) {
+				throw new Error("Invalid analysis result structure");
+			}
+
+			setClauseAnalysis(parsedResult);
 			setClauseAnalysisCounts({
-				acceptable: result.acceptable.length || 0,
-				risky: result.risky.length || 0,
-				missing: result.missing.length || 0,
+				acceptable: parsedResult.acceptable.length || 0,
+				risky: parsedResult.risky.length || 0,
+				missing: parsedResult.missing.length || 0,
 			});
 		} catch (error) {
 			console.error("Document analysis failed:", error);

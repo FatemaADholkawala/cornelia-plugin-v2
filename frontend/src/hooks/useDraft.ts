@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import { message } from "antd";
 import { analysisApi } from "@/services/api";
 
 export const useDraft = () => {
@@ -8,56 +9,39 @@ export const useDraft = () => {
 		useState<boolean>(false);
 	const [draftPrompt, setDraftPrompt] = useState<string>("");
 	const [isDrafting, setIsDrafting] = useState<boolean>(false);
-	const [draftResult, setDraftResult] = useState<string | null>(null);
 
 	const handleDraftSubmit = useCallback(
-		async (location: string = "current"): Promise<void> => {
-			if (!draftPrompt.trim()) return;
+		async (draftLocation: string = "current"): Promise<void> => {
+			if (!draftPrompt.trim()) {
+				message.warning("Please enter a prompt for the draft");
+				return;
+			}
 
 			setIsDrafting(true);
-			setDraftResult(null);
+			setIsDraftModalVisible(false);
 
 			try {
 				const result = await analysisApi.draftText(draftPrompt);
-				setDraftResult(result);
 
-				// Handle the location parameter
-				if (location === "current") {
-					// Insert at current cursor position in Word
-					if (
-						typeof window !== "undefined" &&
-						typeof Office !== "undefined" &&
-						Office.context &&
-						Office.context.document &&
-						typeof Word !== "undefined"
-					) {
-						await Word.run(async (context) => {
-							const selection = context.document.getSelection();
-							selection.insertText(result, Word.InsertLocation.start);
-							await context.sync();
-						});
+				if (result) {
+					if (draftLocation === "current") {
+						// Insert into current document
+						await insertDraftIntoWord(result);
+						message.success("Draft generated and inserted into document!");
+					} else {
+						// Create new document and insert
+						await createNewDocumentWithDraft(result);
+						message.success("Draft generated in new document!");
 					}
-				} else if (location === "new") {
-					// Create new document
-					if (
-						typeof window !== "undefined" &&
-						typeof Office !== "undefined" &&
-						Office.context &&
-						Office.context.document &&
-						typeof Word !== "undefined"
-					) {
-						await Word.run(async (context) => {
-							const newDoc = context.application.createDocument();
-							const body = newDoc.body;
-							body.insertText(result, Word.InsertLocation.start);
-							await context.sync();
-						});
-					}
+					setDraftPrompt("");
+				} else {
+					message.error("Failed to generate draft");
 				}
-			} catch (error) {
-				console.error("Error in draft generation:", error);
-				setDraftResult(
-					"I apologize, but I encountered an error generating the draft. Please try again."
+			} catch (error: any) {
+				console.error("Error generating draft:", error);
+				message.error(
+					"Failed to generate draft: " +
+						(error.response?.data?.error || error.message)
 				);
 			} finally {
 				setIsDrafting(false);
@@ -66,21 +50,123 @@ export const useDraft = () => {
 		[draftPrompt]
 	);
 
+	// Function to create a new document and insert the draft
+	const createNewDocumentWithDraft = async (
+		draftText: string
+	): Promise<void> => {
+		try {
+			// Check if we're in Office environment and Word is available
+			if (
+				typeof window !== "undefined" &&
+				typeof Office !== "undefined" &&
+				Office.context &&
+				Office.context.document &&
+				typeof Word !== "undefined"
+			) {
+				await Word.run(async (context) => {
+					// Create a new document
+					const newDoc = context.application.createDocument();
+					await context.sync();
+
+					// Get the new document's body
+					const body = newDoc.body;
+
+					// Convert markdown formatting to HTML
+					const formattedHtml = convertToWordHtml(draftText);
+
+					// Insert as HTML to preserve formatting
+					body.insertHtml(formattedHtml, Word.InsertLocation.start);
+
+					// Open the document in a new window
+					newDoc.open();
+					await context.sync();
+				});
+			} else {
+				console.log(
+					"Not in Office environment - new document creation not available"
+				);
+			}
+		} catch (error) {
+			console.error("Error creating new document:", error);
+			throw error;
+		}
+	};
+
+	// Function to insert draft into current document
+	const insertDraftIntoWord = async (draftText: string): Promise<void> => {
+		try {
+			// Check if we're in Office environment and Word is available
+			if (
+				typeof window !== "undefined" &&
+				typeof Office !== "undefined" &&
+				Office.context &&
+				Office.context.document &&
+				typeof Word !== "undefined"
+			) {
+				await Word.run(async (context) => {
+					const selection = context.document.getSelection();
+
+					// Convert markdown formatting to HTML
+					const formattedHtml = convertToWordHtml(draftText);
+
+					// Insert as HTML to preserve formatting
+					selection.insertHtml(formattedHtml, Word.InsertLocation.end);
+					await context.sync();
+				});
+			} else {
+				console.log(
+					"Not in Office environment - draft insertion not available"
+				);
+			}
+		} catch (error) {
+			console.error("Error inserting draft into Word:", error);
+			throw error;
+		}
+	};
+
+	// Function to convert markdown-style text to Word-compatible HTML
+	const convertToWordHtml = (text: string): string => {
+		if (!text) return "";
+
+		let htmlText = text;
+
+		// Convert **text** to bold
+		htmlText = htmlText.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+
+		// Convert *text* to italic (only single asterisks that aren't part of double asterisks)
+		htmlText = htmlText.replace(/(?<!\*)\*([^*]+?)\*(?!\*)/g, "<em>$1</em>");
+
+		// Convert line breaks to proper paragraphs
+		htmlText = htmlText.replace(/\n\n/g, "</p><p>");
+		htmlText = htmlText.replace(/\n/g, "<br>");
+
+		// Wrap in paragraph tags
+		htmlText = `<p>${htmlText}</p>`;
+
+		// Handle section headers (all caps text)
+		htmlText = htmlText.replace(
+			/<p>([A-Z\s]{3,}):?\s*<\/p>/g,
+			"<p><strong>$1</strong></p>"
+		);
+
+		// Handle numbered lists and subsections
+		htmlText = htmlText.replace(/(\d+\.\s+)/g, "<strong>$1</strong>");
+		htmlText = htmlText.replace(/(\d+\.\d+\.\s+)/g, "<strong>$1</strong>");
+		htmlText = htmlText.replace(/([a-z]\.\s+)/g, "<strong>$1</strong>");
+		htmlText = htmlText.replace(/\(([a-z])\)/g, "<strong>($1)</strong>");
+
+		// Handle legal terms
+		htmlText = htmlText.replace(
+			/(WHEREAS|NOW THEREFORE|RECITALS)/g,
+			"<strong><u>$1</u></strong>"
+		);
+
+		return htmlText;
+	};
+
 	const handleCloseDraftModal = useCallback((): void => {
 		setIsDraftModalVisible(false);
 		setDraftPrompt("");
-		setDraftResult(null);
-	}, []);
-
-	const openDraftModal = useCallback((): void => {
-		setIsDraftModalVisible(true);
-		setDraftPrompt("");
-		setDraftResult(null);
-	}, []);
-
-	const clearDraft = useCallback((): void => {
-		setDraftPrompt("");
-		setDraftResult(null);
 	}, []);
 
 	return {
@@ -89,11 +175,7 @@ export const useDraft = () => {
 		draftPrompt,
 		setDraftPrompt,
 		isDrafting,
-		draftResult,
-		setDraftResult,
 		handleDraftSubmit,
 		handleCloseDraftModal,
-		openDraftModal,
-		clearDraft,
 	};
 };
