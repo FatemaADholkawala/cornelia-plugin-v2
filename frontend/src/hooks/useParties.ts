@@ -9,7 +9,7 @@ import { HARDCODED_PARTIES } from "@/data/hardcodedData";
 import { parseAPIResponse } from "@/utils/apiUtils";
 
 // Toggle between API and hardcoded values
-const USE_HARDCODED = false; // Set to true to use hardcoded values
+const USE_HARDCODED = true; // Set to true to use hardcoded values for testing
 
 export const useParties = () => {
 	const { documentContent } = useDocument();

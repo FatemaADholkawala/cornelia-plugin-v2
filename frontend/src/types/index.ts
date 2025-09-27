@@ -50,6 +50,8 @@ export interface ChatMessage {
 	content: string;
 	role: "user" | "assistant";
 	timestamp: string;
+	isError?: boolean;
+	isInitialTip?: boolean;
 }
 
 // Comment Types

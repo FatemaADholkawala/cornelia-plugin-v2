@@ -36,7 +36,6 @@ interface HomeViewProps {
 	summary: unknown;
 	setActiveView: (view: string) => void;
 	selectedText: string;
-	setSelectedText: (text: string) => void;
 	setCommentDraft: React.Dispatch<React.SetStateAction<CommentDraft | null>>;
 	isExplaining: boolean;
 	handleExplain: () => void;
@@ -99,7 +98,6 @@ const HomeView: React.FC<HomeViewProps> = ({
 	summary,
 	setActiveView,
 	selectedText,
-	setSelectedText,
 	setCommentDraft,
 	isExplaining,
 	handleExplain,
@@ -181,29 +179,6 @@ const HomeView: React.FC<HomeViewProps> = ({
 				isDrafting={isDrafting}
 				setIsDraftModalVisible={setIsDraftModalVisible}
 			/>
-
-			{/* Text Selection for Browser Testing */}
-			{typeof window !== "undefined" && typeof Office === "undefined" && (
-				<div className="px-4">
-					<div className="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
-						<div className="mb-2">
-							<Text strong>Test Text Selection (Browser Mode):</Text>
-						</div>
-						<TextArea
-							placeholder="Enter text to simulate selection for testing..."
-							value={selectedText}
-							onChange={(e) => {
-								setSelectedText(e.target.value);
-							}}
-							rows={3}
-							className="mb-2"
-						/>
-						<Text type="secondary" className="text-xs">
-							Selected Text: {selectedText || "No text selected"}
-						</Text>
-					</div>
-				</div>
-			)}
 
 			{/* Explanation Preview Card */}
 			<ExplanationPreview

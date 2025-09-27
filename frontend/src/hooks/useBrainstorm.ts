@@ -21,11 +21,13 @@ export const useBrainstorm = () => {
 		): Promise<void> => {
 			if (!message.trim()) return;
 
+			const timestamp = new Date().toLocaleTimeString();
+
 			const userMessage: ChatMessage = {
 				id: Date.now().toString(),
 				content: message,
 				role: "user",
-				timestamp: new Date().toISOString(),
+				timestamp: timestamp,
 			};
 
 			setBrainstormMessages((prev) => [...prev, userMessage]);
@@ -45,7 +47,7 @@ export const useBrainstorm = () => {
 						response ||
 						"I apologize, but I couldn't generate brainstorming ideas at this time.",
 					role: "assistant",
-					timestamp: new Date().toISOString(),
+					timestamp: new Date().toLocaleTimeString(),
 				};
 
 				setBrainstormMessages((prev) => [...prev, assistantMessage]);
@@ -55,9 +57,10 @@ export const useBrainstorm = () => {
 				const errorMessage: ChatMessage = {
 					id: (Date.now() + 1).toString(),
 					content:
-						"I apologize, but I encountered an error generating brainstorming ideas. Please try again.",
+						"Sorry, I encountered an error while processing your request.",
 					role: "assistant",
-					timestamp: new Date().toISOString(),
+					timestamp: new Date().toLocaleTimeString(),
+					isError: true,
 				};
 
 				setBrainstormMessages((prev) => [...prev, errorMessage]);

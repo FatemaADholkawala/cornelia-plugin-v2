@@ -8,7 +8,7 @@
 		"start": "next start -p 3002 --https --ssl-cert ~/.office-addin-dev-certs/localhost.crt --ssl-key ~/.office-addin-dev-certs/localhost.key",
 		"addin:web": "office-addin-debugging start manifest.xml web --dev-server-command=\"npm run dev\" --document=\"YOUR_DOCUMENT_URL\"",
 		"type-check": "tsc --noEmit",
-		"dev": "next dev -p 3002 --experimental-https --experimental-https-key ./localhost-key.pem --experimental-https-cert ./localhost.pem",
+		"dev": "next dev -p 3002",
 		"addin:start": "office-addin-debugging start manifest.xml desktop",
 		"addin:stop": "office-addin-debugging stop manifest.xml"
 	},

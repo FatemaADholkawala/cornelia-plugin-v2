@@ -212,17 +212,15 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
 		if (messages.length === 0) {
 			setMessages([
 				{
-					id: "initial-tip",
 					role: "assistant",
 					content:
 						"Hi! I can help you analyze this document. What would you like to know?",
 					isInitialTip: true,
 					timestamp: new Date().toLocaleTimeString(),
-					sender: "assistant",
 				},
 			]);
 		}
-	}, [messages.length, setMessages]);
+	}, []);
 
 	const scrollToBottom = () => {
 		messagesEndRef.current?.scrollIntoView({

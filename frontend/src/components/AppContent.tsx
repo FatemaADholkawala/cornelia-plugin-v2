@@ -475,7 +475,6 @@ const AppContent: React.FC = () => {
 					homeSummaryReady={homeSummaryReady}
 					handleHomeSummaryClick={handleHomeSummaryClick}
 					selectedText={selectedText}
-					setSelectedText={setSelectedText}
 					setCommentDraft={setCommentDraft}
 					isExplaining={isExplaining}
 					handleExplain={handleExplain}
