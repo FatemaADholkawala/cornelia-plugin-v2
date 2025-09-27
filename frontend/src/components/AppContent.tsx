@@ -113,7 +113,7 @@ const AppContent: React.FC = () => {
 		selectedParty,
 		setSelectedParty,
 		getTagColor,
-		loadParties,
+		//loadParties,
 	} = useParties();
 
 	const handleChangeParty = useCallback(() => {
@@ -191,11 +191,11 @@ const AppContent: React.FC = () => {
 	}, [handleTextSelection]);
 
 	// Load parties when document content changes
-	useEffect(() => {
-		if (documentContent) {
-			loadParties(documentContent);
-		}
-	}, [documentContent, loadParties]);
+	// useEffect(() => {
+	// 	if (documentContent) {
+	// 		//loadParties(documentContent);
+	// 	}
+	// }, [documentContent, loadParties]);
 
 	const handleLogout = (): void => {
 		logout();
@@ -233,7 +233,7 @@ const AppContent: React.FC = () => {
 		if (!selectedText) return;
 
 		try {
-			setGeneratingRedrafts((prev) => {
+			setGeneratingRedrafts((prev: any) => {
 				const newMap = new Map(prev);
 				newMap.set(selectedText, true);
 				return newMap;

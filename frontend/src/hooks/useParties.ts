@@ -9,18 +9,19 @@ import { HARDCODED_PARTIES } from "@/data/hardcodedData";
 import { parseAPIResponse } from "@/utils/apiUtils";
 
 // Toggle between API and hardcoded values
-const USE_HARDCODED = true; // Set to true to use hardcoded values for testing
+const USE_HARDCODED = false; // Set to true to use hardcoded values for testing
 
 export const useParties = () => {
 	const { documentContent } = useDocument();
 	const { isAuthenticated } = useAuth();
-	const [parties, setParties] = useState<Party[]>([]);
+	const [parties, setParties] = useState<any[]>([]);
 	const [isLoadingParties, setIsLoadingParties] = useState<boolean>(false);
-	const [selectedParty, setSelectedParty] = useState<Party | null>(null);
+	const [selectedParty, setSelectedParty] = useState<any | null>(null);
 
 	// Function to determine the tag color based on role
-	const getTagColor = useCallback((role: string): string => {
-		const roleLower = role?.toLowerCase();
+	const getTagColor = useCallback((role: any): string => {
+		if (!role || typeof role !== "string") return "default";
+		const roleLower = role.toLowerCase();
 		const roleColors: Record<string, string> = {
 			"first party": "blue",
 			"second party/successful resolution applicant (sra)": "purple",
@@ -43,7 +44,7 @@ export const useParties = () => {
 
 			setIsLoadingParties(true);
 			try {
-				let parsedResult;
+				let parsedResult: any;
 
 				if (USE_HARDCODED) {
 					// Use hardcoded values for testing
@@ -54,17 +55,27 @@ export const useParties = () => {
 					parsedResult = parseAPIResponse(result);
 				}
 
+				// Ensure parsedResult is properly handled
+				if (!parsedResult) {
+					console.warn("No parsed result received");
+					//setParties([]);
+					return;
+				}
+
 				const partiesArray = Array.isArray(parsedResult)
 					? parsedResult
-					: Array.isArray(parsedResult.parties)
+					: Array.isArray(parsedResult?.parties)
 					? parsedResult.parties
 					: [];
 
 				const validParties = partiesArray
-					.filter((party: any) => party && party.name)
+					.filter(
+						(party: any) =>
+							party && party.name && typeof party.name === "string"
+					)
 					.map((party: any) => ({
-						name: party.name,
-						role: party.role || "Unknown Role",
+						name: String(party.name),
+						role: party.role ? String(party.role) : "Unknown Role",
 					}));
 
 				setParties(validParties);
@@ -80,53 +91,63 @@ export const useParties = () => {
 	}, [documentContent, isAuthenticated]);
 
 	// Manual function to load parties (for compatibility)
-	const loadParties = useCallback(
-		async (content: string) => {
-			if (!content || !isAuthenticated) {
-				setParties([]);
-				setIsLoadingParties(false);
-				return;
-			}
+	// const loadParties = useCallback(
+	// 	async (content: string) => {
+	// 		if (!content || !isAuthenticated) {
+	// 			//setParties([]);
+	// 			setIsLoadingParties(false);
+	// 			return;
+	// 		}
 
-			setIsLoadingParties(true);
-			try {
-				const result = await analysisApi.analyzeParties(content);
+	// 		setIsLoadingParties(true);
+	// 		try {
+	// 			const result = await analysisApi.analyzeParties(content);
 
-				// Parse the API response
-				let parsedResult;
-				if (typeof result === "string") {
-					try {
-						parsedResult = JSON.parse(result);
-					} catch {
-						parsedResult = { parties: [] };
-					}
-				} else {
-					parsedResult = result;
-				}
+	// 			// Parse the API response
+	// 			let parsedResult: any;
+	// 			if (typeof result === "string") {
+	// 				try {
+	// 					parsedResult = JSON.parse(result);
+	// 				} catch {
+	// 					parsedResult = { parties: [] };
+	// 				}
+	// 			} else {
+	// 				parsedResult = result;
+	// 			}
 
-				const partiesArray = Array.isArray(parsedResult)
-					? parsedResult
-					: Array.isArray(parsedResult.parties)
-					? parsedResult.parties
-					: [];
+	// 			// Ensure parsedResult is properly handled
+	// 			if (!parsedResult) {
+	// 				console.warn("No parsed result received in loadParties");
+	// 				//setParties([]);
+	// 				return;
+	// 			}
 
-				const validParties = partiesArray
-					.filter((party: any) => party && party.name)
-					.map((party: any) => ({
-						name: party.name,
-						role: party.role || "Unknown Role",
-					}));
+	// 			const partiesArray = Array.isArray(parsedResult)
+	// 				? parsedResult
+	// 				: Array.isArray(parsedResult?.parties)
+	// 				? parsedResult.parties
+	// 				: [];
 
-				setParties(validParties);
-			} catch (error) {
-				console.error("Error extracting parties:", error);
-				setParties([]);
-			} finally {
-				setIsLoadingParties(false);
-			}
-		},
-		[isAuthenticated]
-	);
+	// 			const validParties = partiesArray
+	// 				.filter(
+	// 					(party: any) =>
+	// 						party && party.name && typeof party.name === "string"
+	// 				)
+	// 				.map((party: any) => ({
+	// 					name: String(party.name),
+	// 					role: party.role ? String(party.role) : "Unknown Role",
+	// 				}));
+
+	// 			setParties(validParties);
+	// 		} catch (error) {
+	// 			console.error("Error extracting parties:", error);
+	// 			setParties([]);
+	// 		} finally {
+	// 			setIsLoadingParties(false);
+	// 		}
+	// 	},
+	// 	[isAuthenticated]
+	// );
 
 	return {
 		parties,
@@ -136,6 +157,5 @@ export const useParties = () => {
 		selectedParty,
 		setSelectedParty,
 		getTagColor,
-		loadParties,
 	};
 };

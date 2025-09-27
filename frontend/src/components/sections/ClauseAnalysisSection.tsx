@@ -13,17 +13,17 @@ import { analysisApi } from "@/services/api";
 import { parseAPIResponse } from "@/utils/apiUtils";
 
 interface ClauseAnalysisSectionProps {
-	clauseAnalysis: ClauseAnalysis | null;
+	clauseAnalysis: any | null;
 	isLoadingParties: boolean;
 	clauseAnalysisLoading: boolean;
-	parties: Party[];
+	parties: any[];
 	getTagColor: (role: string) => string;
-	selectedParty: Party | null;
-	setSelectedParty: (party: Party | null) => void;
+	selectedParty: any | null;
+	setSelectedParty: (party: any | null) => void;
 	setClauseAnalysisLoading: (loading: boolean) => void;
-	setClauseAnalysis: (analysis: ClauseAnalysis | null) => void;
-	setClauseAnalysisCounts: (counts: AnalysisCounts) => void;
-	clauseAnalysisCounts: AnalysisCounts;
+	setClauseAnalysis: (analysis: any | null) => void;
+	setClauseAnalysisCounts: (counts: any) => void;
+	clauseAnalysisCounts: any;
 	setActiveView: (view: any) => void;
 	documentContent: string;
 }
@@ -43,7 +43,7 @@ const ClauseAnalysisSection: React.FC<ClauseAnalysisSectionProps> = ({
 	setActiveView,
 	documentContent,
 }) => {
-	const renderPartyOption = (party: Party) => ({
+	const renderPartyOption = (party: any) => ({
 		value: party.name,
 		label: (
 			<div
@@ -83,18 +83,24 @@ const ClauseAnalysisSection: React.FC<ClauseAnalysisSectionProps> = ({
 
 	const handlePartySelect = async (value: string): Promise<void> => {
 		const selectedParty = parties.find((p) => p.name === value);
-		setSelectedParty(selectedParty || null);
+		setSelectedParty(selectedParty);
+
+		if (!selectedParty) {
+			console.error("No party selected");
+			return;
+		}
 
 		try {
 			setClauseAnalysisLoading(true);
 			const result = await analysisApi.analyzeDocumentClauses(documentContent, {
-				name: selectedParty!.name,
-				role: selectedParty!.role,
+				name: selectedParty.name,
+				role: selectedParty.role,
 			});
 
 			if (!result) {
 				throw new Error("No analysis results received");
 			}
+
 			const parsedResult = parseAPIResponse(result);
 
 			if (
@@ -111,9 +117,9 @@ const ClauseAnalysisSection: React.FC<ClauseAnalysisSectionProps> = ({
 				risky: parsedResult.risky.length || 0,
 				missing: parsedResult.missing.length || 0,
 			});
-		} catch (error) {
+		} catch (error: any) {
 			console.error("Document analysis failed:", error);
-			message.error(`Analysis failed: ${(error as Error).message}`);
+			message.error(`Analysis failed: ${error?.message || "Unknown error"}`);
 			setClauseAnalysis(null);
 		} finally {
 			setClauseAnalysisLoading(false);
