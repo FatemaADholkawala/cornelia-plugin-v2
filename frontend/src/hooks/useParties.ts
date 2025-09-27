@@ -33,9 +33,11 @@ export const useParties = () => {
 		return roleColors[roleLower] || "default";
 	}, []);
 
-	// Extract parties from document content when it updates
-	useEffect(() => {
-		const extractParties = async () => {
+	// Load parties manually when needed (aligns with React.js approach)
+	const loadParties = useCallback(
+		async (content?: string) => {
+			const contentToUse = content || documentContent;
+
 			if (!documentContent || !isAuthenticated) {
 				setParties([]);
 				setIsLoadingParties(false);
@@ -58,7 +60,7 @@ export const useParties = () => {
 				// Ensure parsedResult is properly handled
 				if (!parsedResult) {
 					console.warn("No parsed result received");
-					//setParties([]);
+					setParties([]);
 					return;
 				}
 
@@ -85,69 +87,16 @@ export const useParties = () => {
 			} finally {
 				setIsLoadingParties(false);
 			}
-		};
+		},
+		[documentContent, isAuthenticated]
+	);
 
-		extractParties();
-	}, [documentContent, isAuthenticated]);
-
-	// Manual function to load parties (for compatibility)
-	// const loadParties = useCallback(
-	// 	async (content: string) => {
-	// 		if (!content || !isAuthenticated) {
-	// 			//setParties([]);
-	// 			setIsLoadingParties(false);
-	// 			return;
-	// 		}
-
-	// 		setIsLoadingParties(true);
-	// 		try {
-	// 			const result = await analysisApi.analyzeParties(content);
-
-	// 			// Parse the API response
-	// 			let parsedResult: any;
-	// 			if (typeof result === "string") {
-	// 				try {
-	// 					parsedResult = JSON.parse(result);
-	// 				} catch {
-	// 					parsedResult = { parties: [] };
-	// 				}
-	// 			} else {
-	// 				parsedResult = result;
-	// 			}
-
-	// 			// Ensure parsedResult is properly handled
-	// 			if (!parsedResult) {
-	// 				console.warn("No parsed result received in loadParties");
-	// 				//setParties([]);
-	// 				return;
-	// 			}
-
-	// 			const partiesArray = Array.isArray(parsedResult)
-	// 				? parsedResult
-	// 				: Array.isArray(parsedResult?.parties)
-	// 				? parsedResult.parties
-	// 				: [];
-
-	// 			const validParties = partiesArray
-	// 				.filter(
-	// 					(party: any) =>
-	// 						party && party.name && typeof party.name === "string"
-	// 				)
-	// 				.map((party: any) => ({
-	// 					name: String(party.name),
-	// 					role: party.role ? String(party.role) : "Unknown Role",
-	// 				}));
-
-	// 			setParties(validParties);
-	// 		} catch (error) {
-	// 			console.error("Error extracting parties:", error);
-	// 			setParties([]);
-	// 		} finally {
-	// 			setIsLoadingParties(false);
-	// 		}
-	// 	},
-	// 	[isAuthenticated]
-	// );
+	// Auto-load parties when document content changes (if needed)
+	useEffect(() => {
+		if (documentContent && isAuthenticated) {
+			loadParties();
+		}
+	}, [documentContent, isAuthenticated, loadParties]);
 
 	return {
 		parties,
@@ -157,5 +106,6 @@ export const useParties = () => {
 		selectedParty,
 		setSelectedParty,
 		getTagColor,
+		loadParties,
 	};
 };

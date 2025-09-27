@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect } from "react";
-import { Layout, Button, Typography, message, Input } from "antd";
+import { Layout, Button, Typography, message } from "antd";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDocument } from "@/hooks/useDocument";
@@ -12,6 +12,7 @@ import { useBrainstorm } from "@/hooks/useBrainstorm";
 import { useDraft } from "@/hooks/useDraft";
 import { useParties } from "@/hooks/useParties";
 import { analysisApi } from "@/services/api";
+import { Clause } from "@/types";
 import Timer from "./Timer";
 import MainContent from "./MainContent";
 
@@ -19,7 +20,7 @@ const { Text } = Typography;
 const { Content } = Layout;
 
 const AppContent: React.FC = () => {
-	const { isAuthenticated, logout } = useAuth();
+	const { logout } = useAuth();
 
 	const {
 		documentContent,
@@ -113,7 +114,6 @@ const AppContent: React.FC = () => {
 		selectedParty,
 		setSelectedParty,
 		getTagColor,
-		//loadParties,
 	} = useParties();
 
 	const handleChangeParty = useCallback(() => {
@@ -190,13 +190,6 @@ const AppContent: React.FC = () => {
 		}
 	}, [handleTextSelection]);
 
-	// Load parties when document content changes
-	// useEffect(() => {
-	// 	if (documentContent) {
-	// 		//loadParties(documentContent);
-	// 	}
-	// }, [documentContent, loadParties]);
-
 	const handleLogout = (): void => {
 		logout();
 		message.success("Successfully logged out");
@@ -233,11 +226,9 @@ const AppContent: React.FC = () => {
 		if (!selectedText) return;
 
 		try {
-			setGeneratingRedrafts((prev: any) => {
-				const newMap = new Map(prev);
-				newMap.set(selectedText, true);
-				return newMap;
-			});
+			const newMap = new Map(generatingRedrafts);
+			newMap.set(selectedText, true);
+			setGeneratingRedrafts(newMap);
 			setIsRedraftModalVisible(false);
 
 			const result = await analysisApi.redraftText(
@@ -258,11 +249,9 @@ const AppContent: React.FC = () => {
 			console.error("Error generating redraft:", error);
 			message.error("Failed to generate redraft: " + (error as Error).message);
 		} finally {
-			setGeneratingRedrafts((prev) => {
-				const newMap = new Map(prev);
-				newMap.delete(selectedText);
-				return newMap;
-			});
+			const newMap = new Map(generatingRedrafts);
+			newMap.delete(selectedText);
+			setGeneratingRedrafts(newMap);
 			setRedraftContent("");
 		}
 	};
@@ -297,22 +286,19 @@ const AppContent: React.FC = () => {
 				console.log("Not in Office environment - redraft applied in UI only");
 			}
 
-			setRedraftedTexts((prev) => {
-				const newMap = new Map(prev);
-				newMap.set(selectedText, generatedRedraft.redraftedText);
-				return newMap;
-			});
-			setRedraftedClauses((prev) => {
-				const newSet = new Set(prev);
-				newSet.add(selectedText);
-				return newSet;
-			});
+			const newTextsMap = new Map(redraftedTexts);
+			newTextsMap.set(selectedText, generatedRedraft.redraftedText);
+			setRedraftedTexts(newTextsMap);
+
+			const newClausesSet = new Set(redraftedClauses);
+			newClausesSet.add(selectedText);
+			setRedraftedClauses(newClausesSet);
+
 			setGeneratedRedraft(null);
-			setRedraftReviewStates((prev) => {
-				const newMap = new Map(prev);
-				newMap.delete(selectedText);
-				return newMap;
-			});
+
+			const newReviewStatesMap = new Map(redraftReviewStates);
+			newReviewStatesMap.delete(selectedText);
+			setRedraftReviewStates(newReviewStatesMap);
 			setRedraftContent("");
 			message.success("Redraft applied successfully");
 		} catch (error) {
@@ -351,7 +337,7 @@ const AppContent: React.FC = () => {
 				timestamp: new Date().toISOString(),
 			};
 
-			setComments((prev) => [...prev, newComment]);
+			setComments([...comments, newComment]);
 			setCommentDraft(null);
 			message.success("Comment added successfully");
 		} catch (error) {
@@ -370,7 +356,7 @@ const AppContent: React.FC = () => {
 		setRedraftContent(content);
 	};
 
-	const handleSelectedClauseChange = (clause: any): void => {
+	const handleSelectedClauseChange = (clause: Clause | null): void => {
 		setSelectedClause(clause);
 	};
 
@@ -388,7 +374,9 @@ const AppContent: React.FC = () => {
 		setRedraftedTexts(texts);
 	};
 
-	const handleRedraftReviewStatesChange = (states: Map<string, any>): void => {
+	const handleRedraftReviewStatesChange = (
+		states: Map<string, unknown>
+	): void => {
 		setRedraftReviewStates(states);
 	};
 

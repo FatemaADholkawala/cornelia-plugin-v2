@@ -190,8 +190,6 @@ export const analysisApi = {
 		}
 	},
 
-	// analyzeParties function moved to avoid duplication
-
 	explainText: async (
 		selectedText: string,
 		contextText: string
