@@ -139,3 +139,4 @@ The Successful Resolution Applicant shall indemnify and keep indemnified the Esc
 
 IN WITNESS WHEREOF, the parties have executed this Agreement on the date first above written.
 `;
+

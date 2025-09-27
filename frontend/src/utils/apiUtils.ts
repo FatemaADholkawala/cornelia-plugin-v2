@@ -73,3 +73,4 @@ export const parseAPIResponse = (result: any): any => {
 
 	throw new Error(`Unexpected response type: ${typeof result}`);
 };
+

@@ -197,3 +197,41 @@
 	font-size: 14px;
 	color: #374151;
 }
+
+/* Chat UI Styles - matching Word plugin */
+.animate-fadeIn {
+	animation: fadeIn 0.3s ease-out;
+}
+
+/* Chat Window Styles */
+.ant-input {
+	border-radius: 9999px !important;
+	padding-left: 1.25rem !important;
+	padding-right: 1.25rem !important;
+	height: 40px !important;
+	transition: all 0.2s !important;
+}
+
+.ant-input:hover {
+	border-color: #d1d5db !important;
+}
+
+.ant-input:focus {
+	border-color: #3b82f6 !important;
+	box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1) !important;
+}
+
+.ant-btn-primary {
+	background: #3b82f6 !important;
+	border-color: #3b82f6 !important;
+}
+
+.ant-btn-primary:hover {
+	background: #2563eb !important;
+	border-color: #2563eb !important;
+}
+
+.ant-btn-primary:disabled {
+	background: #93c5fd !important;
+	border-color: #93c5fd !important;
+}
