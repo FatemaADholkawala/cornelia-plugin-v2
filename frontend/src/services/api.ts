@@ -190,7 +190,15 @@ export const analysisApi = {
 		}
 	},
 
-	// analyzeParties function moved to avoid duplication
+	analyzeParties: async (text: string): Promise<Party[] | null> => {
+		try {
+			const response = await api.post("/plugin/analyze_parties/", { text });
+			return response.data.success ? response.data.parties : null;
+		} catch (error) {
+			console.error("Error in party analysis:", error);
+			throw error;
+		}
+	},
 
 	explainText: async (
 		selectedText: string,
@@ -303,12 +311,11 @@ export const analysisApi = {
 		}
 	},
 
-	analyzeParties: async (text: string): Promise<any[] | null> => {
+	analyzeParties: async (text: string): Promise<Party[]> => {
 		try {
 			const response = await api.post("/plugin/analyze_parties/", {
 				text: text,
 			});
-			console.log("Party analysis response:", response.data);
 			return response.data.success ? response.data.parties : null;
 		} catch (error) {
 			console.error("Error in party analysis:", error);

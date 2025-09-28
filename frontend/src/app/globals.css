@@ -235,3 +235,184 @@
 	background: #93c5fd !important;
 	border-color: #93c5fd !important;
 }
+
+/* Document Analysis specific styles */
+.modal-title {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	color: #1890ff;
+	font-size: 14px;
+}
+
+.modal-icon {
+	font-size: 16px;
+}
+
+.redraft-textarea {
+	resize: none;
+	font-size: 14px;
+	line-height: 2;
+	border-radius: 6px;
+}
+
+.comment-textarea {
+	resize: none;
+	font-size: 14px;
+	line-height: 2;
+	border-radius: 6px;
+}
+
+.redraft-preview.ant-input,
+.comment-textarea.ant-input {
+	border: 1px solid #d9d9d9 !important;
+	border-radius: 8px !important;
+	padding: 12px !important;
+	font-size: 14px !important;
+	line-height: 1.6 !important;
+	background-color: #ffffff !important;
+	resize: none !important;
+	width: 100% !important;
+	min-height: 120px !important;
+	box-shadow: none !important;
+	transition: border-color 0.2s ease !important;
+	overflow-y: auto !important;
+	max-height: 200px !important;
+}
+
+.redraft-preview.ant-input:hover,
+.comment-textarea.ant-input:hover {
+	border-color: #40a9ff !important;
+}
+
+.redraft-preview.ant-input:focus,
+.comment-textarea.ant-input:focus {
+	border-color: #40a9ff !important;
+	box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.1) !important;
+	outline: none !important;
+}
+
+/* Custom media query for responsive layout */
+@media (min-width: 400px) {
+	.custom-flex-row {
+		flex-direction: row !important;
+	}
+}
+
+/* Container styles for overflow handling */
+.container-class {
+	overflow: hidden;
+	max-width: 100%;
+	word-wrap: break-word;
+	word-break: break-word;
+	box-sizing: border-box;
+}
+
+.flex-container {
+	min-width: 0;
+	flex-shrink: 1;
+}
+
+.text-content {
+	text-overflow: ellipsis;
+	white-space: normal;
+	overflow-wrap: break-word;
+}
+
+/* Message Styles */
+.message-system {
+	background: rgba(243, 244, 246, 0.8);
+	backdrop-filter: blur(8px);
+}
+
+.message-user {
+	background: #3b82f6;
+	color: white;
+}
+
+.message-assistant {
+	background: #f3f4f6;
+	color: #1f2937;
+}
+
+.message-bubble {
+	max-width: 80%;
+	margin-bottom: 1rem;
+	padding: 0.75rem 1rem;
+	border-radius: 1rem;
+}
+
+.user-message {
+	margin-left: auto;
+	background-color: #2563eb;
+	color: white;
+}
+
+.assistant-message {
+	margin-right: auto;
+	background-color: white;
+	border: 1px solid #e5e7eb;
+}
+
+/* Chat specific styles */
+.chat-container {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	height: 100%;
+}
+
+.chat-messages {
+	flex: 1;
+	overflow-y: auto;
+	padding: 1rem;
+}
+
+.chat-input {
+	border-top: 1px solid #e5e7eb;
+	padding: 1rem;
+	background: white;
+}
+
+/* Collapse styles */
+.ant-collapse {
+	background-color: white;
+	border-radius: 8px;
+}
+
+.ant-collapse-header {
+	padding: 12px 16px !important;
+}
+
+.ant-collapse-content-box {
+	padding: 0 16px 16px !important;
+}
+
+/* Brainstorm modal styles */
+.brainstorm-modal .ant-modal-content {
+	border-radius: 8px;
+	padding: 0;
+}
+
+.brainstorm-modal .ant-modal-header {
+	padding: 12px;
+	border-bottom: 1px solid #f0f0f0;
+	margin: 0;
+}
+
+.brainstorm-modal .ant-modal-body {
+	padding: 12px;
+}
+
+.brainstorm-modal .ant-modal-footer {
+	padding: 8px 12px;
+	border-top: 1px solid #f0f0f0;
+	margin: 0;
+	display: flex;
+	justify-content: flex-end;
+}
+
+.brainstorm-modal .ant-modal-footer .ant-btn {
+	padding: 8px 8px;
+	height: 30px;
+}

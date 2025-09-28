@@ -28,7 +28,8 @@ import {
 	BulbOutlined,
 } from "@ant-design/icons";
 import { analysisApi } from "@/services/api";
-import ChatWindow from "../views/ChatWindowView";
+import { findClauseInDocument, findAndReplaceClause } from "@/utils/wordUtils";
+import ChatWindow from "../views/ChatWindow";
 
 const { Panel } = Collapse;
 const { Text, Title, Paragraph } = Typography;
@@ -130,23 +131,26 @@ const ClauseAnalysis = React.memo<ClauseAnalysisProps>(
 					typeof Word !== "undefined"
 				) {
 					await Word.run(async (context) => {
-						// Simple text search for now - can be enhanced later
-						const body = context.document.body;
-						body.load("text");
-						await context.sync();
+						// Use our advanced clause finding utility
+						const foundRange = await findClauseInDocument(context, clauseText);
 
-						const text = body.text;
-						const index = text.indexOf(clauseText);
+						if (foundRange) {
+							// Successfully found the clause
+							foundRange.select();
+							foundRange.scrollIntoView();
 
-						if (index !== -1) {
-							const range = body.getRange(index, index + clauseText.length);
-							range.select();
-							range.scrollIntoView();
-							await context.sync();
+							// No highlighting to avoid issues with it persisting
 						} else {
+							// If advanced search fails, notify the user
 							message.warning(
 								"Could not find the exact clause in the document"
 							);
+
+							// Log the failure for debugging
+							console.warn("Failed to find clause:", {
+								clauseTextLength: clauseText.length,
+								clauseTextPreview: clauseText.substring(0, 100) + "...",
+							});
 						}
 					});
 				} else {
@@ -259,19 +263,14 @@ const ClauseAnalysis = React.memo<ClauseAnalysisProps>(
 						// Get the text to search for - either the current redrafted text or the original
 						const searchText = redraftedTexts.get(item.text) || item.text;
 
-						// Simple text replacement for now
-						const body = context.document.body;
-						body.load("text");
-						await context.sync();
+						// Use our advanced clause finding and replacement utility
+						const success = await findAndReplaceClause(
+							context,
+							searchText,
+							redraftState.text
+						);
 
-						const text = body.text;
-						const index = text.indexOf(searchText);
-
-						if (index !== -1) {
-							const range = body.getRange(index, index + searchText.length);
-							range.insertText(redraftState.text, Word.InsertLocation.replace);
-							await context.sync();
-
+						if (success) {
 							// Update tracking states
 							onRedraftedClausesChange(
 								new Set([...redraftedClauses, item.text])
@@ -571,20 +570,15 @@ const ClauseAnalysis = React.memo<ClauseAnalysisProps>(
 					typeof Word !== "undefined"
 				) {
 					await Word.run(async (context) => {
-						// Simple text search for now
-						const body = context.document.body;
-						body.load("text");
-						await context.sync();
+						// Use our advanced clause finding utility
+						const foundRange = await findClauseInDocument(
+							context,
+							activeCommentItem.text
+						);
 
-						const text = body.text;
-						const index = text.indexOf(activeCommentItem.text);
-
-						if (index !== -1) {
-							const range = body.getRange(
-								index,
-								index + activeCommentItem.text.length
-							);
-							const comment = range.insertComment(commentContent);
+						if (foundRange) {
+							// Add comment to the found range
+							const comment = foundRange.insertComment(commentContent);
 							await context.sync();
 
 							// Reset state
@@ -593,9 +587,17 @@ const ClauseAnalysis = React.memo<ClauseAnalysisProps>(
 							setActiveCommentItem(null);
 							message.success("Comment added successfully");
 						} else {
+							// If advanced search fails, notify the user
 							message.warning(
 								"Could not find the exact clause in the document"
 							);
+
+							// Log the failure for debugging
+							console.warn("Failed to find clause for comment:", {
+								clauseTextLength: activeCommentItem.text.length,
+								clauseTextPreview:
+									activeCommentItem.text.substring(0, 100) + "...",
+							});
 						}
 					});
 				} else {

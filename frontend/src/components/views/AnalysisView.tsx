@@ -80,7 +80,7 @@ const AnalysisView: React.FC<AnalysisViewProps> = ({
 					<Button
 						type="primary"
 						icon={<ArrowLeftOutlined />}
-						onClick={() => setActiveView("home")}
+						onClick={() => setActiveView(null)}
 					>
 						Return to Home
 					</Button>
