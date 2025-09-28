@@ -9,7 +9,7 @@ import { HARDCODED_PARTIES } from "@/data/hardcodedData";
 import { parseAPIResponse } from "@/utils/apiUtils";
 
 // Toggle between API and hardcoded values
-const USE_HARDCODED = true; // Set to true to use hardcoded values for testing
+const USE_HARDCODED = false; // Set to true to use hardcoded values for testing
 
 export const useParties = () => {
 	const { documentContent } = useDocument();
@@ -61,8 +61,8 @@ export const useParties = () => {
 					: [];
 
 				const validParties = partiesArray
-					.filter((party: any) => party && party.name)
-					.map((party: any) => ({
+					.filter((party) => party && party.name)
+					.map((party) => ({
 						name: party.name,
 						role: party.role || "Unknown Role",
 					}));
@@ -111,8 +111,8 @@ export const useParties = () => {
 					: [];
 
 				const validParties = partiesArray
-					.filter((party: any) => party && party.name)
-					.map((party: any) => ({
+					.filter((party) => party && party.name)
+					.map((party) => ({
 						name: party.name,
 						role: party.role || "Unknown Role",
 					}));
