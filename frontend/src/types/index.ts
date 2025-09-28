@@ -94,7 +94,8 @@ export type ActiveView =
 	| "home"
 	| "analysis"
 	| "chat"
-	| "contextual-intelligence";
+	| "contextual-intelligence"
+	| "summary";
 
 export interface AppState {
 	activeView: ActiveView | null;

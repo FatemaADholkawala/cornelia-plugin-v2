@@ -11,6 +11,7 @@ import {
 	RedraftContent,
 	Explanation,
 	CommentDraft,
+	Clause,
 } from "@/types";
 import HomeView from "./views/HomeView";
 import AnalysisView from "./views/AnalysisView";
@@ -21,7 +22,7 @@ import DocumentSummaryView from "./views/DocumentSummaryView";
 interface MainContentProps {
 	activeView: ActiveView | null;
 	documentContent: string;
-	summary: any;
+	summary: string;
 	summaryLoading: boolean;
 	summaryProgress: number;
 	summaryError: string | null;
@@ -47,24 +48,25 @@ interface MainContentProps {
 	handleChangeParty: () => void;
 	isRedraftModalVisible: boolean;
 	redraftContent: string;
-	selectedClause: any;
+	selectedClause: Clause | null;
 	generatedRedraft: RedraftContent | null;
 	generatingRedrafts: Map<string, boolean>;
 	redraftedClauses: Set<string>;
 	redraftedTexts: Map<string, string>;
-	redraftReviewStates: Map<string, any>;
+	redraftReviewStates: Map<string, RedraftContent>;
 	onRedraftModalVisibility: (visible: boolean) => void;
 	onRedraftContentChange: (content: string) => void;
-	onSelectedClauseChange: (clause: any) => void;
+	onSelectedClauseChange: (clause: Clause | null) => void;
 	onGeneratingRedraftsChange: (redrafts: Map<string, boolean>) => void;
 	onRedraftedClausesChange: (clauses: Set<string>) => void;
 	onRedraftedTextsChange: (texts: Map<string, string>) => void;
-	onRedraftReviewStatesChange: (states: Map<string, any>) => void;
+	onRedraftReviewStatesChange: (states: Map<string, RedraftContent>) => void;
 	homeSummaryLoading: boolean;
 	homeSummaryReady: boolean;
 	handleHomeSummaryClick: () => void;
 	selectedText: string;
-	setCommentDraft: (draft: CommentDraft | null) => void;
+	setSelectedText: (text: string) => void;
+	setCommentDraft: React.Dispatch<React.SetStateAction<CommentDraft | null>>;
 	isExplaining: boolean;
 	handleExplain: () => void;
 	setRedraftContent: (content: string) => void;
@@ -118,14 +120,40 @@ const MainContent: React.FC<MainContentProps> = (props) => {
 				/>
 			);
 		case "analysis":
-			return <AnalysisView {...props} />;
+			return (
+				<AnalysisView
+					clauseAnalysisLoading={props.clauseAnalysisLoading}
+					selectedParty={props.selectedParty}
+					setSelectedParty={props.setSelectedParty}
+					clauseAnalysis={props.clauseAnalysis}
+					setClauseAnalysis={props.setClauseAnalysis}
+					setActiveView={props.setActiveView}
+					getTagColor={props.getTagColor}
+					onChangeParty={props.handleChangeParty}
+					isRedraftModalVisible={props.isRedraftModalVisible}
+					redraftContent={props.redraftContent}
+					selectedClause={props.selectedClause}
+					generatedRedraft={props.generatedRedraft}
+					generatingRedrafts={props.generatingRedrafts}
+					redraftedClauses={props.redraftedClauses}
+					redraftedTexts={props.redraftedTexts}
+					redraftReviewStates={props.redraftReviewStates}
+					onRedraftModalVisibility={props.onRedraftModalVisibility}
+					onRedraftContentChange={props.onRedraftContentChange}
+					onSelectedClauseChange={props.onSelectedClauseChange}
+					onGeneratingRedraftsChange={props.onGeneratingRedraftsChange}
+					onRedraftedClausesChange={props.onRedraftedClausesChange}
+					onRedraftedTextsChange={props.onRedraftedTextsChange}
+					onRedraftReviewStatesChange={props.onRedraftReviewStatesChange}
+				/>
+			);
 		case "chat":
 			return <ChatWindowView {...props} />;
 		case "contextual-intelligence":
 			return <ContextualIntelligenceView {...props} />;
 		case "home":
 		default:
-			return <HomeView {...props} />;
+			return <HomeView {...props} setSelectedText={props.setSelectedText} />;
 	}
 };
 

@@ -12,6 +12,7 @@ import {
 	RedraftContent,
 	Explanation,
 	CommentDraft,
+	ActiveView,
 } from "@/types";
 import ClauseAnalysisSection from "../sections/ClauseAnalysisSection";
 import ActionPanelSection from "../sections/ActionPanelSection";
@@ -34,7 +35,7 @@ interface HomeViewProps {
 	homeSummaryReady: boolean;
 	handleHomeSummaryClick: () => void;
 	summary: unknown;
-	setActiveView: (view: string) => void;
+	setActiveView: (view: ActiveView | null) => void;
 	selectedText: string;
 	setSelectedText: (text: string) => void;
 	setCommentDraft: React.Dispatch<React.SetStateAction<CommentDraft | null>>;
@@ -71,7 +72,7 @@ interface HomeViewProps {
 	isRedraftModalVisible: boolean;
 	redraftContent: string;
 	handleRedraft: () => void;
-	redraftTextAreaRef: React.RefObject<HTMLTextAreaElement>;
+	redraftTextAreaRef: React.RefObject<HTMLTextAreaElement | null>;
 	isBrainstormModalVisible: boolean;
 	brainstormMessages: ChatMessage[];
 	brainstormLoading: boolean;

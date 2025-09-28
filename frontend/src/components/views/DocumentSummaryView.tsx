@@ -20,6 +20,7 @@ import {
 	ArrowLeftOutlined,
 	LoadingOutlined,
 } from "@ant-design/icons";
+import { ActiveView } from "@/types";
 
 const { Paragraph, Title } = Typography;
 const antIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />;
@@ -31,7 +32,7 @@ interface DocumentSummaryProps {
 	progress: number;
 	error: string | null;
 	onGenerateSummary: () => void;
-	setActiveView: (view: string) => void;
+	setActiveView: (view: ActiveView | null) => void;
 }
 
 const DocumentSummaryView: React.FC<DocumentSummaryProps> = ({

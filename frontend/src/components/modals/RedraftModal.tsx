@@ -12,7 +12,7 @@ interface RedraftModalProps {
 	onRedraft: () => void;
 	redraftContent: string;
 	setRedraftContent: (content: string) => void;
-	redraftTextAreaRef: React.RefObject<HTMLTextAreaElement>;
+	redraftTextAreaRef: React.RefObject<HTMLTextAreaElement | null>;
 }
 
 const RedraftModal: React.FC<RedraftModalProps> = ({
