@@ -12,6 +12,7 @@ import { useBrainstorm } from "@/hooks/useBrainstorm";
 import { useDraft } from "@/hooks/useDraft";
 import { useParties } from "@/hooks/useParties";
 import { analysisApi } from "@/services/api";
+import { findAndReplaceClause } from "@/utils/wordUtils";
 import Timer from "./Timer";
 import MainContent from "./MainContent";
 
@@ -233,7 +234,7 @@ const AppContent: React.FC = () => {
 		if (!selectedText) return;
 
 		try {
-			setGeneratingRedrafts((prev: any) => {
+			(setGeneratingRedrafts as any)((prev: any) => {
 				const newMap = new Map(prev);
 				newMap.set(selectedText, true);
 				return newMap;
@@ -258,7 +259,7 @@ const AppContent: React.FC = () => {
 			console.error("Error generating redraft:", error);
 			message.error("Failed to generate redraft: " + (error as Error).message);
 		} finally {
-			setGeneratingRedrafts((prev) => {
+			(setGeneratingRedrafts as any)((prev: any) => {
 				const newMap = new Map(prev);
 				newMap.delete(selectedText);
 				return newMap;
@@ -279,36 +280,42 @@ const AppContent: React.FC = () => {
 				Office.context.document &&
 				typeof Word !== "undefined"
 			) {
-				await Word.run(async (context) => {
+				await Word.run(async (context: any) => {
 					// Get the selected text
 					const selection = context.document.getSelection();
 					selection.load("text");
 					await context.sync();
-
-					// Replace the selected text with the redrafted version
-					selection.insertText(
-						generatedRedraft.redraftedText,
-						Word.InsertLocation.replace
+					
+					// Use our enhanced findAndReplaceClause function
+					const success = await findAndReplaceClause(
+						context, 
+						selection.text, 
+						generatedRedraft.redraftedText
 					);
-					await context.sync();
+					
+					if (!success) {
+						// Fallback to direct replacement if our enhanced method fails
+						selection.insertText(
+							generatedRedraft.redraftedText,
+							Word.InsertLocation.replace
+						);
+						await context.sync();
+					}
 				});
 			} else {
 				// In browser environment, just show success message
 				console.log("Not in Office environment - redraft applied in UI only");
 			}
 
-			setRedraftedTexts((prev) => {
-				const newMap = new Map(prev);
-				newMap.set(selectedText, generatedRedraft.redraftedText);
-				return newMap;
-			});
-			setRedraftedClauses((prev) => {
-				const newSet = new Set(prev);
-				newSet.add(selectedText);
-				return newSet;
-			});
+			(setRedraftedTexts as any)((prev: any) =>
+				new Map(prev).set(
+					selectedText,
+					generatedRedraft.redraftedText
+				)
+			);
+			(setRedraftedClauses as any)((prev: any) => new Set([...prev, selectedText]));
 			setGeneratedRedraft(null);
-			setRedraftReviewStates((prev) => {
+			(setRedraftReviewStates as any)((prev: any) => {
 				const newMap = new Map(prev);
 				newMap.delete(selectedText);
 				return newMap;
@@ -351,7 +358,7 @@ const AppContent: React.FC = () => {
 				timestamp: new Date().toISOString(),
 			};
 
-			setComments((prev) => [...prev, newComment]);
+			(setComments as any)((prev: any) => [...prev, newComment]);
 			setCommentDraft(null);
 			message.success("Comment added successfully");
 		} catch (error) {
@@ -440,6 +447,7 @@ const AppContent: React.FC = () => {
 					comments={comments}
 					setComments={setComments}
 					initialResolvedComments={initialResolvedComments}
+					setSelectedText={setSelectedText}
 					handleCommentUpdate={handleCommentUpdate}
 					chatMessages={chatMessages}
 					setChatMessages={setChatMessages}
@@ -475,7 +483,7 @@ const AppContent: React.FC = () => {
 					homeSummaryReady={homeSummaryReady}
 					handleHomeSummaryClick={handleHomeSummaryClick}
 					selectedText={selectedText}
-					setCommentDraft={setCommentDraft}
+					setCommentDraft={setCommentDraft as any}
 					isExplaining={isExplaining}
 					handleExplain={handleExplain}
 					setRedraftContent={setRedraftContent}

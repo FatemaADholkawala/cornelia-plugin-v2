@@ -11,6 +11,7 @@ import {
 } from "@ant-design/icons";
 import { Comment } from "@/types";
 import { analysisApi } from "@/services/api";
+import { findAndReplaceClause } from "@/utils/wordUtils";
 
 const { TextArea } = Input;
 
@@ -88,7 +89,7 @@ const CommentActions: React.FC<CommentActionsProps> = React.memo(
 					comment.text,
 					documentContent,
 					aiReplyContent.trim(),
-					comment.replies || []
+					(comment as any).replies || []
 				);
 
 				if (result) {
@@ -133,7 +134,7 @@ const CommentActions: React.FC<CommentActionsProps> = React.memo(
 						const updatedComment = {
 							...comment,
 							replies: [
-								...(comment.replies || []),
+								...((comment as any).replies || []),
 								{
 									id: newReply.id,
 									content: generatedReply,
@@ -152,7 +153,7 @@ const CommentActions: React.FC<CommentActionsProps> = React.memo(
 					const updatedComment = {
 						...comment,
 						replies: [
-							...(comment.replies || []),
+							...((comment as any).replies || []),
 							{
 								id: `reply-${Date.now()}`,
 								content: generatedReply,
@@ -258,7 +259,7 @@ const CommentActions: React.FC<CommentActionsProps> = React.memo(
 					documentContent,
 					selectedText,
 					redraftContent.trim(),
-					comment.replies || []
+					(comment as any).replies || []
 				);
 
 				if (result) {
@@ -296,13 +297,13 @@ const CommentActions: React.FC<CommentActionsProps> = React.memo(
 					Office.context.document &&
 					typeof Word !== "undefined"
 				) {
-					await Word.run(async (context) => {
+					await Word.run(async (context: any) => {
 						const comments = context.document.body.getComments();
 						comments.load("items");
 						await context.sync();
 
 						const targetComment = comments.items.find(
-							(c) => c.id === comment.id
+							(c: any) => c.id === comment.id
 						);
 						if (!targetComment) {
 							throw new Error("Comment not found");
@@ -315,24 +316,36 @@ const CommentActions: React.FC<CommentActionsProps> = React.memo(
 
 						// If the comment range has text, use it directly
 						if (contentRange.text && contentRange.text.trim().length > 0) {
-							contentRange.insertText(
-								generatedRedraft.text,
-								Word.InsertLocation.replace
-							);
+							// Use our advanced clause finding and replacement utility
+							const success = await findAndReplaceClause(context, contentRange.text, generatedRedraft.text);
+							
+							if (!success) {
+								// Fallback to direct replacement if our advanced method fails
+								contentRange.insertText(
+									generatedRedraft.text,
+									Word.InsertLocation.replace
+								);
+							}
 						} else {
 							// If the comment range is empty, try to find the text using our advanced search
 							const selectedText = lastModifiedPosition?.text || comment.text;
-							throw new Error("Could not find the text to redraft");
+							
+							// Use our advanced clause finding and replacement utility
+							const success = await findAndReplaceClause(context, selectedText, generatedRedraft.text);
+							
+							if (!success) {
+								throw new Error("Could not find the text to redraft");
+							}
 						}
 
 						// Store range information for undo tracking
 						setRedraftRangeTracking({
 							originalText:
 								contentRange.text || lastModifiedPosition?.text || comment.text,
-							originalStart: contentRange.start,
-							originalEnd: contentRange.end,
-							newStart: contentRange.start,
-							newEnd: contentRange.start + generatedRedraft.text.length,
+							originalStart: (contentRange as any).start,
+							originalEnd: (contentRange as any).end,
+							newStart: (contentRange as any).start,
+							newEnd: (contentRange as any).start + generatedRedraft.text.length,
 							commentId: comment.id,
 						});
 
@@ -394,8 +407,8 @@ const CommentActions: React.FC<CommentActionsProps> = React.memo(
 						// Update UI state through CommentList with the new content
 						onCommentUpdate?.({
 							...comment,
-							resolved: true,
-							content: generatedRedraft?.text || comment.text, // Store the updated content
+							isResolved: true,
+							text: generatedRedraft?.text || comment.text, // Store the updated content
 						});
 
 						message.success("Text redrafted and comment resolved");
@@ -403,9 +416,9 @@ const CommentActions: React.FC<CommentActionsProps> = React.memo(
 				} else {
 					// In browser environment, just update the UI
 					onCommentUpdate?.({
-						...comment,
-						resolved: true,
-						content: generatedRedraft?.text || comment.text,
+							...comment,
+							isResolved: true,
+						text: generatedRedraft?.text || comment.text,
 					});
 					message.success("Text redrafted and comment resolved");
 				}
@@ -449,7 +462,7 @@ const CommentActions: React.FC<CommentActionsProps> = React.memo(
 						await context.sync();
 
 						// Store the position before modification
-						const startPosition = contentRange.start;
+						const startPosition = (contentRange as any).start;
 						const textLength = generatedRedraft.text.length;
 
 						// Insert the new text
@@ -474,7 +487,7 @@ const CommentActions: React.FC<CommentActionsProps> = React.memo(
 						// Update UI state
 						onCommentUpdate?.({
 							...comment,
-							content: generatedRedraft.text,
+							text: generatedRedraft.text,
 						});
 					});
 				} else {
@@ -519,7 +532,7 @@ const CommentActions: React.FC<CommentActionsProps> = React.memo(
 						const updatedComment = {
 							...comment,
 							replies: [
-								...(comment.replies || []),
+								...((comment as any).replies || []),
 								{
 									id: newReply.id,
 									content: aiReplyContent,
@@ -539,7 +552,7 @@ const CommentActions: React.FC<CommentActionsProps> = React.memo(
 					const updatedComment = {
 						...comment,
 						replies: [
-							...(comment.replies || []),
+							...((comment as any).replies || []),
 							{
 								id: `reply-${Date.now()}`,
 								content: aiReplyContent,
