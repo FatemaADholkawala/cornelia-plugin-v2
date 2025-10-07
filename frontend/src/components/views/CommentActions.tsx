@@ -81,8 +81,8 @@ const CommentActions: React.FC<CommentActionsProps> = React.memo(
 						return body.text;
 					});
 				} else {
-					// In browser environment, use mock content
-					documentContent = "Mock document content for browser testing";
+					// In browser environment, use empty content
+					documentContent = "";
 				}
 
 				const result = await analysisApi.replyToComment(
@@ -249,8 +249,8 @@ const CommentActions: React.FC<CommentActionsProps> = React.memo(
 							contentRange.text || lastModifiedPosition?.text || comment.text;
 					});
 				} else {
-					// In browser environment, use mock content
-					documentContent = "Mock document content for browser testing";
+					// In browser environment, use empty content
+					documentContent = "";
 					selectedText = comment.text;
 				}
 
@@ -317,8 +317,12 @@ const CommentActions: React.FC<CommentActionsProps> = React.memo(
 						// If the comment range has text, use it directly
 						if (contentRange.text && contentRange.text.trim().length > 0) {
 							// Use our advanced clause finding and replacement utility
-							const success = await findAndReplaceClause(context, contentRange.text, generatedRedraft.text);
-							
+							const success = await findAndReplaceClause(
+								context,
+								contentRange.text,
+								generatedRedraft.text
+							);
+
 							if (!success) {
 								// Fallback to direct replacement if our advanced method fails
 								contentRange.insertText(
@@ -329,10 +333,14 @@ const CommentActions: React.FC<CommentActionsProps> = React.memo(
 						} else {
 							// If the comment range is empty, try to find the text using our advanced search
 							const selectedText = lastModifiedPosition?.text || comment.text;
-							
+
 							// Use our advanced clause finding and replacement utility
-							const success = await findAndReplaceClause(context, selectedText, generatedRedraft.text);
-							
+							const success = await findAndReplaceClause(
+								context,
+								selectedText,
+								generatedRedraft.text
+							);
+
 							if (!success) {
 								throw new Error("Could not find the text to redraft");
 							}
@@ -345,7 +353,8 @@ const CommentActions: React.FC<CommentActionsProps> = React.memo(
 							originalStart: (contentRange as any).start,
 							originalEnd: (contentRange as any).end,
 							newStart: (contentRange as any).start,
-							newEnd: (contentRange as any).start + generatedRedraft.text.length,
+							newEnd:
+								(contentRange as any).start + generatedRedraft.text.length,
 							commentId: comment.id,
 						});
 
@@ -416,8 +425,8 @@ const CommentActions: React.FC<CommentActionsProps> = React.memo(
 				} else {
 					// In browser environment, just update the UI
 					onCommentUpdate?.({
-							...comment,
-							isResolved: true,
+						...comment,
+						isResolved: true,
 						text: generatedRedraft?.text || comment.text,
 					});
 					message.success("Text redrafted and comment resolved");
@@ -740,6 +749,7 @@ const CommentActions: React.FC<CommentActionsProps> = React.memo(
 					<TextArea
 						ref={replyTextAreaRef}
 						rows={5}
+						autoSize={{ minRows: 5 }}
 						value={aiReplyContent}
 						onChange={(e) => setAIReplyContent(e.target.value)}
 						onKeyPress={(e) => handleKeyPress(e, "aiReply")}
@@ -777,6 +787,7 @@ const CommentActions: React.FC<CommentActionsProps> = React.memo(
 					<TextArea
 						ref={redraftTextAreaRef}
 						rows={5}
+						autoSize={{ minRows: 5 }}
 						value={redraftContent}
 						onChange={(e) => setRedraftContent(e.target.value)}
 						onKeyPress={(e) => handleKeyPress(e, "redraft")}

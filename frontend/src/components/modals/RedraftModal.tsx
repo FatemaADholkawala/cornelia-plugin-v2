@@ -12,7 +12,7 @@ interface RedraftModalProps {
 	onRedraft: () => void;
 	redraftContent: string;
 	setRedraftContent: (content: string) => void;
-	redraftTextAreaRef: React.RefObject<HTMLTextAreaElement | null>;
+	redraftTextAreaRef: React.RefObject<any>;
 }
 
 const RedraftModal: React.FC<RedraftModalProps> = ({
@@ -49,6 +49,7 @@ const RedraftModal: React.FC<RedraftModalProps> = ({
 			<TextArea
 				ref={redraftTextAreaRef}
 				rows={5}
+				autoSize={{ minRows: 5 }}
 				value={redraftContent}
 				onChange={(e) => setRedraftContent(e.target.value)}
 				onKeyPress={(e) => {
@@ -59,6 +60,7 @@ const RedraftModal: React.FC<RedraftModalProps> = ({
 				}}
 				placeholder="Give instructions for your redraft..."
 				className="redraft-textarea"
+				autoFocus
 			/>
 		</Modal>
 	);

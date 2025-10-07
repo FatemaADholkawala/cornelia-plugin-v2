@@ -197,6 +197,7 @@ const HomeView: React.FC<HomeViewProps> = ({
 								setSelectedText(e.target.value);
 							}}
 							rows={3}
+							autoSize={{ minRows: 3 }}
 							className="mb-2"
 						/>
 						<Text type="secondary" className="text-xs">

@@ -58,8 +58,9 @@ const CommentPreview: React.FC<CommentPreviewProps> = ({
 							}}
 							placeholder="Type your comment here..."
 							autoFocus
-							className="mt-1 border-none focus:shadow-none bg-transparent resize-none"
+							className="mt-1 border-none focus:shadow-none bg-transparent resize-none comment-text-area"
 							rows={4}
+							autoSize={{ minRows: 4 }}
 						/>
 					</div>
 					<div className="flex justify-end mt-1">

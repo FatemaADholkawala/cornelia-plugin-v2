@@ -416,3 +416,39 @@
 	padding: 8px 8px;
 	height: 30px;
 }
+/* Redraft modal styles */
+.redraft-modal .ant-modal-content {
+	border-radius: 8px;
+	padding: 0;
+}
+
+.redraft-modal .ant-modal-header {
+	padding: 12px;
+	border-bottom: 1px solid #f0f0f0;
+	margin: 0;
+}
+
+.redraft-modal .ant-modal-body {
+	padding: 12px;
+}
+
+.redraft-modal .ant-modal-footer {
+	padding: 8px 12px;
+	border-top: 1px solid #f0f0f0;
+	margin: 0;
+	display: flex;
+	justify-content: flex-end;
+}
+
+.redraft-modal .ant-modal-footer .ant-btn {
+	padding: 8px 8px;
+	height: 30px;
+}
+
+.ai-reply-textarea,
+.comment-textarea,
+.comment-text-area,
+.redraft-textarea,
+.draft-textarea {
+	border-radius: 4px !important;
+}

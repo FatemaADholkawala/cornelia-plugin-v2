@@ -190,7 +190,7 @@ const ClauseAnalysis = React.memo<ClauseAnalysisProps>(
 						return body.text;
 					});
 				} else {
-					documentContent = "Mock document content for browser testing";
+					documentContent = "";
 				}
 
 				const result = await analysisApi.redraftComment(
@@ -212,11 +212,9 @@ const ClauseAnalysis = React.memo<ClauseAnalysisProps>(
 			} catch (error: any) {
 				message.error("Failed to generate redraft: " + error.message);
 			} finally {
-				onGeneratingRedraftsChange((prev) => {
-					const next = new Map(prev);
-					next.delete(selectedClause.text);
-					return next;
-				});
+				const next = new Map(generatingRedrafts);
+				next.delete(selectedClause.text);
+				onGeneratingRedraftsChange(next);
 			}
 		};
 
@@ -231,11 +229,9 @@ const ClauseAnalysis = React.memo<ClauseAnalysisProps>(
 			onRedraftModalVisibility(true);
 
 			// Remove the current redraft review state for this item
-			onRedraftReviewStatesChange((prev) => {
-				const next = new Map(prev);
-				next.delete(item.text);
-				return next;
-			});
+			const next = new Map(redraftReviewStates);
+			next.delete(item.text);
+			onRedraftReviewStatesChange(next);
 
 			// Focus the redraft textarea when modal opens
 			setTimeout(() => {
@@ -280,11 +276,9 @@ const ClauseAnalysis = React.memo<ClauseAnalysisProps>(
 							);
 
 							// Clear the redraft review state for this item
-							onRedraftReviewStatesChange((prev) => {
-								const next = new Map(prev);
-								next.delete(item.text);
-								return next;
-							});
+							const next = new Map(redraftReviewStates);
+							next.delete(item.text);
+							onRedraftReviewStatesChange(next);
 
 							message.success("Text redrafted successfully");
 						} else {
@@ -299,11 +293,9 @@ const ClauseAnalysis = React.memo<ClauseAnalysisProps>(
 						onRedraftedTextsChange(
 							new Map(redraftedTexts).set(item.text, redraftState.text)
 						);
-						onRedraftReviewStatesChange((prev) => {
-							const next = new Map(prev);
-							next.delete(item.text);
-							return next;
-						});
+						const next = new Map(redraftReviewStates);
+						next.delete(item.text);
+						onRedraftReviewStatesChange(next);
 						message.success("Text redrafted successfully (UI only)");
 					}
 				}
@@ -321,11 +313,9 @@ const ClauseAnalysis = React.memo<ClauseAnalysisProps>(
 			onRedraftModalVisibility(true);
 
 			// Clear any existing redraft review state for this item
-			onRedraftReviewStatesChange((prev) => {
-				const next = new Map(prev);
-				next.delete(item.text);
-				return next;
-			});
+			const next = new Map(redraftReviewStates);
+			next.delete(item.text);
+			onRedraftReviewStatesChange(next);
 
 			setTimeout(() => {
 				redraftTextAreaRef.current?.focus();
@@ -922,6 +912,7 @@ const ClauseAnalysis = React.memo<ClauseAnalysisProps>(
 							<TextArea
 								ref={redraftTextAreaRef}
 								rows={5}
+								autoSize={{ minRows: 5 }}
 								value={redraftContent}
 								onChange={(e) => onRedraftContentChange(e.target.value)}
 								onKeyPress={handleKeyPress}
@@ -974,6 +965,7 @@ const ClauseAnalysis = React.memo<ClauseAnalysisProps>(
 							<TextArea
 								ref={commentTextAreaRef}
 								rows={5}
+								autoSize={{ minRows: 5 }}
 								value={commentContent}
 								onChange={(e) => setCommentContent(e.target.value)}
 								onKeyPress={(e) => {

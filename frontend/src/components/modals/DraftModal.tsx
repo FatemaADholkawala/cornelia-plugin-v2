@@ -54,6 +54,7 @@ const DraftModal: React.FC<DraftModalProps> = ({
 			<div className="space-y-4">
 				<TextArea
 					rows={5}
+					autoSize={{ minRows: 5 }}
 					value={draftPrompt}
 					onChange={(e) => setDraftPrompt(e.target.value)}
 					onKeyPress={(e) => {
