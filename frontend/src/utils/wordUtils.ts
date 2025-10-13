@@ -120,7 +120,7 @@ const validateAndExtendRange = async (
 ) => {
 	try {
 		let currentRange = initialRange;
-		let completeRange = initialRange;
+		const completeRange = initialRange;
 
 		// Check each subsequent chunk
 		for (let j = 1; j < chunks.length; j++) {
@@ -642,8 +642,8 @@ const findAndReplaceClause = async (
 			if (paragraphIndex >= 0) {
 				// Look at paragraphs before and after to find the full clause
 				const maxParagraphsToCheck = 5; // Limit how far we look
-				let startIndex = Math.max(0, paragraphIndex - maxParagraphsToCheck);
-				let endIndex = Math.min(
+				const startIndex = Math.max(0, paragraphIndex - maxParagraphsToCheck);
+				const endIndex = Math.min(
 					paragraphs.items.length - 1,
 					paragraphIndex + maxParagraphsToCheck
 				);

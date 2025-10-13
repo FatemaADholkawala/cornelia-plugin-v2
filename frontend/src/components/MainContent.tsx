@@ -120,6 +120,11 @@ const MainContent: React.FC<MainContentProps> = (props) => {
 				/>
 			);
 		case "analysis":
+			console.log("MainContent: Rendering AnalysisView with state:", {
+				selectedParty: props.selectedParty?.name,
+				hasClauseAnalysis: !!props.clauseAnalysis,
+				clauseAnalysisLoading: props.clauseAnalysisLoading,
+			});
 			return (
 				<AnalysisView
 					clauseAnalysisLoading={props.clauseAnalysisLoading}

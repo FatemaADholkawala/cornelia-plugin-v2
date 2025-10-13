@@ -424,4 +424,6 @@ const CommentListView = React.memo(
 	}
 );
 
+CommentListView.displayName = "CommentListView";
+
 export default CommentListView;

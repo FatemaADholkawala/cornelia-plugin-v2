@@ -106,7 +106,7 @@ const DraftPreview: React.FC<DraftPreviewProps> = ({
 					<div className="bg-white rounded p-3 border border-gray-100">
 						<div className="text-xs text-gray-500 mb-2">
 							<FileTextOutlined className="mr-1" />
-							Prompt: "{draft.prompt}"
+							Prompt: &quot;{draft.prompt}&quot;
 						</div>
 						<div
 							className="mt-1 text-sm border-l-2 border-blue-400 pl-3 leading-relaxed draft-preview-content"

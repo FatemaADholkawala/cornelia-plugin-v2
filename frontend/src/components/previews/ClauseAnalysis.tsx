@@ -695,7 +695,8 @@ const ClauseAnalysis = React.memo<ClauseAnalysisProps>(
 						<div className="flex flex-col items-center justify-center p-8">
 							<Spin size="large" />
 							<Text className="text-gray-500">
-								Analyzing clauses from {selectedParty?.name}'s perspective...
+								Analyzing clauses from {selectedParty?.name}&apos;s
+								perspective...
 							</Text>
 						</div>
 					) : !results ? (
@@ -1031,5 +1032,7 @@ const ClauseAnalysis = React.memo<ClauseAnalysisProps>(
 		);
 	}
 );
+
+ClauseAnalysis.displayName = "ClauseAnalysis";
 
 export default ClauseAnalysis;

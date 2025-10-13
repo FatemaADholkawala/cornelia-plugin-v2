@@ -65,6 +65,14 @@ const AnalysisView: React.FC<AnalysisViewProps> = ({
 	onRedraftedTextsChange,
 	onRedraftReviewStatesChange,
 }) => {
+	// Debug logging to understand state issues
+	console.log("AnalysisView Debug:", {
+		clauseAnalysisLoading,
+		selectedParty: selectedParty?.name,
+		hasClauseAnalysis: !!clauseAnalysis,
+		clauseAnalysisKeys: clauseAnalysis ? Object.keys(clauseAnalysis) : null,
+	});
+
 	return (
 		<div className="p-4">
 			{clauseAnalysisLoading ? (
@@ -73,9 +81,13 @@ const AnalysisView: React.FC<AnalysisViewProps> = ({
 					<Text className="mt-4">Analyzing document...</Text>
 				</div>
 			) : !selectedParty || !clauseAnalysis ? (
-				<div className="flex flex-col items-center justify-center">
-					<Text className="mb-4">
-						Please select a party from the home screen to start analysis
+				<div className="flex flex-col items-center justify-center p-8">
+					<Text className="mb-4 text-center">
+						{!selectedParty && !clauseAnalysis
+							? "Please select a party and run analysis from the home screen to view detailed results"
+							: !selectedParty
+							? "Please select a party from the home screen to view analysis"
+							: "No analysis data available. Please run analysis from the home screen."}
 					</Text>
 					<Button
 						type="primary"

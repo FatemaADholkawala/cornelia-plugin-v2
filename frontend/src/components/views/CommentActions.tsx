@@ -800,4 +800,6 @@ const CommentActions: React.FC<CommentActionsProps> = React.memo(
 	}
 );
 
+CommentActions.displayName = "CommentActions";
+
 export default CommentActions;
