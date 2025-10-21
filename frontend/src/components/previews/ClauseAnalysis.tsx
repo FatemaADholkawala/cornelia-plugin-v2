@@ -514,11 +514,9 @@ const ClauseAnalysis = React.memo<ClauseAnalysisProps>(
 									<Button
 										size="small"
 										onClick={() => {
-											onRedraftReviewStatesChange((prev) => {
-												const next = new Map(prev);
-												next.delete(item.text);
-												return next;
-											});
+											const next = new Map(redraftReviewStates);
+											next.delete(item.text);
+											onRedraftReviewStatesChange(next);
 										}}
 										className="flex-1 sm:flex-none min-w-[80px] hover:bg-red-600 hover:text-white hover:border-red-600 transition-colors"
 									>

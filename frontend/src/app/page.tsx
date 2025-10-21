@@ -4,8 +4,6 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import LoadingSpinner from "@/components/LoadingSpinner";
-import TaskpanePage from "./taskpane/page";
-import Test from "./test/page";
 
 export default function Home() {
 	const { isAuthenticated, isLoading } = useAuth();

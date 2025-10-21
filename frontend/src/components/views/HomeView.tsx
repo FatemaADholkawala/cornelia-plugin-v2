@@ -22,9 +22,11 @@ import DocumentCommentSection from "../sections/DocumentCommentSection";
 import RedraftModal from "../modals/RedraftModal";
 import BrainStormModal from "../modals/BrainStormModal";
 import DraftModal from "../modals/DraftModal";
+import NegotiateModal from "../modals/NegotiateModal";
 import ExplanationPreview from "../previews/ExplanationPreview";
 import RedraftPreview from "../previews/RedraftPreview";
 import CommentPreview from "../previews/CommentPreview";
+import { useNegotiate } from "@/hooks/useNegotiate";
 
 const { Text } = Typography;
 const { TextArea } = Input;
@@ -149,6 +151,18 @@ const HomeView: React.FC<HomeViewProps> = ({
 	handleDraftSubmit,
 	handleCloseDraftModal,
 }) => {
+	// ===== UNIFIED NEGOTIATE HOOK =====
+	// This replaces separate Brainstorm and Redraft flows with a single unified experience
+	const {
+		isNegotiateModalVisible,
+		negotiateMessages,
+		setNegotiateMessages,
+		negotiateLoading,
+		handleNegotiateSubmit,
+		openNegotiateModal,
+		closeNegotiateModal,
+	} = useNegotiate();
+
 	return (
 		<div className="flex flex-col h-full space-y-4 py-4">
 			{/* Document Analysis Card */}
@@ -175,10 +189,14 @@ const HomeView: React.FC<HomeViewProps> = ({
 				generatingRedrafts={generatingRedrafts}
 				handleExplain={handleExplain}
 				setCommentDraft={setCommentDraft}
+				// Legacy props - kept for backward compatibility
 				setRedraftContent={setRedraftContent}
 				setIsRedraftModalVisible={setIsRedraftModalVisible}
 				setIsBrainstormModalVisible={setIsBrainstormModalVisible}
 				setBrainstormMessages={setBrainstormMessages}
+				// New unified negotiate props
+				onNegotiateClick={openNegotiateModal}
+				negotiateLoading={negotiateLoading}
 				isDrafting={isDrafting}
 				setIsDraftModalVisible={setIsDraftModalVisible}
 			/>
@@ -302,6 +320,19 @@ const HomeView: React.FC<HomeViewProps> = ({
 				onDraft={handleDraftSubmit}
 				draftPrompt={draftPrompt}
 				setDraftPrompt={setDraftPrompt}
+			/>
+
+			{/* ===== UNIFIED NEGOTIATE MODAL ===== */}
+			{/* This replaces both Brainstorm and Redraft modals with a single interface */}
+			<NegotiateModal
+				isVisible={isNegotiateModalVisible}
+				onClose={closeNegotiateModal}
+				selectedText={selectedText}
+				documentContent={documentContent}
+				negotiateMessages={negotiateMessages}
+				setNegotiateMessages={setNegotiateMessages}
+				negotiateLoading={negotiateLoading}
+				onSubmit={handleNegotiateSubmit}
 			/>
 		</div>
 	);

@@ -54,7 +54,7 @@ const CommentListView = React.memo(
 
 				const parsedDate = new Date(dateString);
 
-				if (parsedDate instanceof Date && !isNaN(parsedDate)) {
+				if (parsedDate instanceof Date && !isNaN(parsedDate.getTime())) {
 					return parsedDate.toLocaleString("en-US", {
 						year: "numeric",
 						month: "short",
@@ -73,7 +73,7 @@ const CommentListView = React.memo(
 					const [_, datePart, timePart] = parts;
 					const date = new Date(`${datePart} ${timePart}`);
 
-					if (date instanceof Date && !isNaN(date)) {
+					if (date instanceof Date && !isNaN(date.getTime())) {
 						return date.toLocaleString("en-US", {
 							year: "numeric",
 							month: "short",

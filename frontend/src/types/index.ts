@@ -1,3 +1,15 @@
+// Global type declarations for Office.js
+declare global {
+	interface Window {
+		Office?: any;
+		Word?: any;
+	}
+	// eslint-disable-next-line no-var
+	var Office: any;
+	// eslint-disable-next-line no-var
+	var Word: any;
+}
+
 // Authentication Types
 export interface User {
 	id: string;
@@ -44,14 +56,22 @@ export interface AnalysisCounts {
 	missing: number;
 }
 
+export interface AnalysisFormData {
+	party: Party | null;
+	contractType: string;
+	concerns: string;
+	focusAreas: string;
+}
+
 // Chat Types
 export interface ChatMessage {
-	id: string;
+	id?: string;
 	content: string;
 	role: "user" | "assistant";
 	timestamp: string;
 	isError?: boolean;
 	isInitialTip?: boolean;
+	isNegotiateResponse?: boolean; // Flag for merged brainstorm + redraft responses
 }
 
 // Comment Types
@@ -73,6 +93,13 @@ export interface RedraftContent {
 	redraftedText: string;
 	instructions: string;
 	timestamp: string;
+}
+
+// Draft Types
+export interface Draft {
+	prompt: string;
+	draftedText: string;
+	timestamp?: string;
 }
 
 // Explanation Types
