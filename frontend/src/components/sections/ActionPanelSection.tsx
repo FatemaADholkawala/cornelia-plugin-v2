@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Button } from "antd";
+import { Button, Tooltip } from "antd";
 import {
 	CommentOutlined,
 	InfoCircleOutlined,
@@ -79,16 +79,18 @@ const ActionPanelSection: React.FC<ActionPanelSectionProps> = ({
 
 					{/* ===== NEW: UNIFIED NEGOTIATE BUTTON ===== */}
 					{/* This replaces both Redraft and Brainstorm buttons */}
-					<Button
-						type="primary"
-						icon={<ThunderboltOutlined />}
-						className="flex-1 min-w-[120px] flex items-center justify-center gap-2 !px-4 !h-9 bg-blue-500 hover:bg-blue-600"
-						disabled={!selectedText}
-						loading={negotiateLoading}
-						onClick={onNegotiateClick}
-					>
-						{negotiateLoading ? "Negotiating..." : "Help Me Negotiate"}
-					</Button>
+					<Tooltip title="Help me negotiate this clause" placement="top">
+						<Button
+							type="primary"
+							icon={<ThunderboltOutlined />}
+							className="flex-1 min-w-[120px] flex items-center justify-center gap-2 !px-4 !h-9 bg-blue-500 hover:bg-blue-600"
+							disabled={!selectedText}
+							loading={negotiateLoading}
+							onClick={onNegotiateClick}
+						>
+							{negotiateLoading ? "Negotiating..." : "Negotiate"}
+						</Button>
+					</Tooltip>
 
 					{/* Draft Button - unchanged */}
 					<Button

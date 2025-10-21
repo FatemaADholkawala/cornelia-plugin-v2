@@ -333,6 +333,7 @@ const HomeView: React.FC<HomeViewProps> = ({
 				setNegotiateMessages={setNegotiateMessages}
 				negotiateLoading={negotiateLoading}
 				onSubmit={handleNegotiateSubmit}
+				setSelectedText={setSelectedText}
 			/>
 		</div>
 	);
