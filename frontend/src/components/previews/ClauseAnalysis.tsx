@@ -691,8 +691,16 @@ const ClauseAnalysis = React.memo<ClauseAnalysisProps>(
 		// ===== NEGOTIATE HANDLER =====
 		const handleNegotiateClick = async (item: any) => {
 			try {
+				console.log("🚀 Opening negotiate modal for clause:", {
+					clauseId: item.id,
+					clauseType: item.type,
+					textLength: item.text.length,
+					textPreview: item.text.substring(0, 100) + "...",
+				});
+
 				// Set the selected text for the negotiate modal
 
+				// RESTORE AUTO-SELECTION: Find and select the complete clause
 				if (
 					typeof window !== "undefined" &&
 					typeof Office !== "undefined" &&
@@ -701,15 +709,24 @@ const ClauseAnalysis = React.memo<ClauseAnalysisProps>(
 					typeof Word !== "undefined"
 				) {
 					await Word.run(async (context) => {
-						// Use our advanced clause finding utility
+						// Use findClauseInDocument to locate the clause
 						const foundRange = await findClauseInDocument(context, item.text);
 
 						if (foundRange) {
-							// Successfully found the clause
+							foundRange.load("text");
+							await context.sync();
+
+							// Select the complete clause
 							foundRange.select();
 							foundRange.scrollIntoView();
+							await context.sync();
 
-							// No highlighting to avoid issues with it persisting
+							console.log("✅ Complete clause selected in Word document");
+						} else {
+							console.log("⚠️ Could not find clause automatically");
+							message.warning(
+								"Could not locate the clause in the document. Please manually select the text in Word and try again."
+							);
 						}
 					});
 				}
