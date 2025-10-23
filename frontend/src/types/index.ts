@@ -162,6 +162,9 @@ export interface ClauseAnalysisRequest {
 		name: string;
 		role: string;
 	};
+	contractType?: string; // Contract type from form
+	concerns?: string; // User's specific concerns
+	focusAreas?: string; // Areas to focus on
 }
 
 // Context Types

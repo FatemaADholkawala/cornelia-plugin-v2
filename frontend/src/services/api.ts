@@ -169,7 +169,12 @@ export const analysisApi = {
 
 	analyzeDocumentClauses: async (
 		text: string,
-		partyInfo?: Party
+		partyInfo?: Party,
+		additionalData?: {
+			contractType?: string;
+			concerns?: string;
+			focusAreas?: string;
+		}
 	): Promise<ClauseAnalysis | null> => {
 		try {
 			const requestBody: ClauseAnalysisRequest = {
@@ -180,6 +185,9 @@ export const analysisApi = {
 							role: partyInfo.role,
 					  }
 					: undefined,
+				contractType: additionalData?.contractType,
+				concerns: additionalData?.concerns,
+				focusAreas: additionalData?.focusAreas,
 			};
 
 			const response = await api.post("/plugin/analyze_clauses/", requestBody);
@@ -311,17 +319,17 @@ export const analysisApi = {
 		}
 	},
 
-	analyzeParties: async (text: string): Promise<Party[]> => {
-		try {
-			const response = await api.post("/plugin/analyze_parties/", {
-				text: text,
-			});
-			return response.data.success ? response.data.parties : null;
-		} catch (error) {
-			console.error("Error in party analysis:", error);
-			throw error;
-		}
-	},
+	// analyzeParties: async (text: string): Promise<Party[]> => {
+	// 	try {
+	// 		const response = await api.post("/plugin/analyze_parties/", {
+	// 			text: text,
+	// 		});
+	// 		return response.data.success ? response.data.parties : null;
+	// 	} catch (error) {
+	// 		console.error("Error in party analysis:", error);
+	// 		throw error;
+	// 	}
+	// },
 };
 
 // Mock API for demo purposes

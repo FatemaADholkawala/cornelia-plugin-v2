@@ -137,10 +137,18 @@ const ClauseAnalysisSection: React.FC<ClauseAnalysisSectionProps> = ({
 				focusAreas: formData.focusAreas,
 			});
 
-			const result = await analysisApi.analyzeDocumentClauses(documentContent, {
-				name: formData.party.name,
-				role: formData.party.role,
-			});
+			const result = await analysisApi.analyzeDocumentClauses(
+				documentContent,
+				{
+					name: formData.party.name,
+					role: formData.party.role,
+				},
+				{
+					contractType: formData.contractType,
+					concerns: formData.concerns,
+					focusAreas: formData.focusAreas,
+				}
+			);
 
 			if (!result) {
 				throw new Error("No analysis results received from API");
