@@ -285,14 +285,14 @@ const AppContent: React.FC = () => {
 					const selection = context.document.getSelection();
 					selection.load("text");
 					await context.sync();
-					
+
 					// Use our enhanced findAndReplaceClause function
 					const success = await findAndReplaceClause(
-						context, 
-						selection.text, 
+						context,
+						selection.text,
 						generatedRedraft.redraftedText
 					);
-					
+
 					if (!success) {
 						// Fallback to direct replacement if our enhanced method fails
 						selection.insertText(
@@ -308,12 +308,11 @@ const AppContent: React.FC = () => {
 			}
 
 			(setRedraftedTexts as any)((prev: any) =>
-				new Map(prev).set(
-					selectedText,
-					generatedRedraft.redraftedText
-				)
+				new Map(prev).set(selectedText, generatedRedraft.redraftedText)
 			);
-			(setRedraftedClauses as any)((prev: any) => new Set([...prev, selectedText]));
+			(setRedraftedClauses as any)(
+				(prev: any) => new Set([...prev, selectedText])
+			);
 			setGeneratedRedraft(null);
 			(setRedraftReviewStates as any)((prev: any) => {
 				const newMap = new Map(prev);
@@ -401,7 +400,7 @@ const AppContent: React.FC = () => {
 
 	return (
 		<Layout className="h-screen">
-			<div className="flex justify-between items-center p-4 bg-white border-b">
+			<div className="flex flex-col gap-2 p-4 bg-white border-b">
 				<div className="flex items-center gap-3">
 					{(activeView === "chat" ||
 						activeView === "analysis" ||
@@ -409,7 +408,7 @@ const AppContent: React.FC = () => {
 						<Button
 							onClick={() => setActiveView("home")}
 							type="text"
-							className="flex items-center !p-2 hover:bg-gray-50 rounded-full"
+							className="flex items-center !p-1 hover:bg-gray-50 rounded-full !w-0"
 							icon={<ArrowLeftOutlined />}
 						/>
 					)}

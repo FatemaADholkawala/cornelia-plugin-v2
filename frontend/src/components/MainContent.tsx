@@ -150,6 +150,9 @@ const MainContent: React.FC<MainContentProps> = (props) => {
 					onRedraftedClausesChange={props.onRedraftedClausesChange}
 					onRedraftedTextsChange={props.onRedraftedTextsChange}
 					onRedraftReviewStatesChange={props.onRedraftReviewStatesChange}
+					documentContent={props.documentContent}
+					setSelectedText={props.setSelectedText}
+					selectedText={props.selectedText}
 				/>
 			);
 		case "chat":

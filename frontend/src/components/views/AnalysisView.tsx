@@ -38,6 +38,11 @@ interface AnalysisViewProps {
 	onRedraftedClausesChange: (clauses: Set<string>) => void;
 	onRedraftedTextsChange: (texts: Map<string, string>) => void;
 	onRedraftReviewStatesChange: (states: Map<string, any>) => void;
+
+	// Negotiate functionality props
+	documentContent: string;
+	setSelectedText?: (text: string) => void;
+	selectedText?: string;
 }
 
 const AnalysisView: React.FC<AnalysisViewProps> = ({
@@ -64,6 +69,9 @@ const AnalysisView: React.FC<AnalysisViewProps> = ({
 	onRedraftedClausesChange,
 	onRedraftedTextsChange,
 	onRedraftReviewStatesChange,
+	documentContent,
+	setSelectedText,
+	selectedText,
 }) => {
 	// Debug logging to understand state issues
 	console.log("AnalysisView Debug:", {
@@ -119,6 +127,9 @@ const AnalysisView: React.FC<AnalysisViewProps> = ({
 					onRedraftedClausesChange={onRedraftedClausesChange}
 					onRedraftedTextsChange={onRedraftedTextsChange}
 					onRedraftReviewStatesChange={onRedraftReviewStatesChange}
+					documentContent={documentContent}
+					setSelectedText={setSelectedText}
+					selectedText={selectedText}
 				/>
 			)}
 		</div>

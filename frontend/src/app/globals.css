@@ -450,6 +450,9 @@
 	padding: 16px 20px !important;
 	background: white !important;
 	border-radius: 12px 12px 0 0 !important;
+	display: flex !important;
+	flex-direction: column !important;
+	gap: 8px !important;
 }
 
 .document-analysis-panel .ant-collapse-content-box {

@@ -26,10 +26,13 @@ import {
 	UserOutlined,
 	MessageOutlined,
 	BulbOutlined,
+	ThunderboltOutlined,
 } from "@ant-design/icons";
 import { analysisApi } from "@/services/api";
 import { findClauseInDocument, findAndReplaceClause } from "@/utils/wordUtils";
 import ChatWindow from "../views/ChatWindow";
+import NegotiateModal from "../modals/NegotiateModal";
+import { useNegotiate } from "@/hooks/useNegotiate";
 
 const { Panel } = Collapse;
 const { Text, Title, Paragraph } = Typography;
@@ -56,6 +59,10 @@ interface ClauseAnalysisProps {
 	onRedraftedClausesChange: (clauses: Set<string>) => void;
 	onRedraftedTextsChange: (texts: Map<string, string>) => void;
 	onRedraftReviewStatesChange: (states: Map<string, any>) => void;
+	// Negotiate functionality props
+	documentContent: string;
+	setSelectedText?: (text: string) => void;
+	selectedText?: string;
 }
 
 const ClauseAnalysis = React.memo<ClauseAnalysisProps>(
@@ -80,6 +87,9 @@ const ClauseAnalysis = React.memo<ClauseAnalysisProps>(
 		onRedraftedClausesChange,
 		onRedraftedTextsChange,
 		onRedraftReviewStatesChange,
+		documentContent,
+		setSelectedText,
+		selectedText,
 	}) => {
 		const redraftTextAreaRef = useRef<any>(null);
 		const [isCommentModalVisible, setIsCommentModalVisible] = useState(false);
@@ -91,7 +101,18 @@ const ClauseAnalysis = React.memo<ClauseAnalysisProps>(
 		const [brainstormMessages, setBrainstormMessages] = useState<any[]>([]);
 		const [brainstormLoading, setBrainstormLoading] = useState(false);
 		const [activeBrainstormItem, setActiveBrainstormItem] = useState<any>(null);
-		const [documentContent, setDocumentContent] = useState("");
+		const [localDocumentContent, setLocalDocumentContent] = useState("");
+
+		// ===== UNIFIED NEGOTIATE HOOK =====
+		const {
+			isNegotiateModalVisible,
+			negotiateMessages,
+			setNegotiateMessages,
+			negotiateLoading,
+			handleNegotiateSubmit,
+			openNegotiateModal,
+			closeNegotiateModal,
+		} = useNegotiate();
 
 		const parseResults = (resultsString: any) => {
 			try {
@@ -457,34 +478,23 @@ const ClauseAnalysis = React.memo<ClauseAnalysisProps>(
 								>
 									<span className="truncate">Comment</span>
 								</Button>
-								<Button
-									size="small"
-									icon={<BulbOutlined />}
-									onClick={async (e) => {
-										e.stopPropagation();
-										setActiveBrainstormItem(item);
-										await fetchDocumentContent();
-										setIsBrainstormModalVisible(true);
-										setBrainstormMessages([]);
-									}}
-									className="flex-1 basis-[calc(50%-4px)] min-w-[110px] flex items-center justify-center gap-1.5 !px-3 !h-8
-    text-purple-500 hover:text-purple-600 border-purple-500 hover:border-purple-600"
-								>
-									<span className="truncate">Brainstorm</span>
-								</Button>
+								{/* ===== UNIFIED NEGOTIATE BUTTON ===== */}
+								{/* This replaces both Brainstorm and Suggest Improvements buttons */}
 								<Button
 									type="primary"
 									size="small"
-									icon={<EditOutlined />}
-									onClick={(e) => {
+									icon={<ThunderboltOutlined />}
+									onClick={async (e) => {
 										e.stopPropagation();
-										handleRedraftClick(item);
+										await handleNegotiateClick(item);
 									}}
-									loading={generatingRedrafts.get(item.text)}
-									className="flex-1 basis-full min-w-[140px] flex items-center justify-center gap-1.5 !px-3 !h-8
-    bg-yellow-500 hover:bg-yellow-600 border-yellow-500 hover:border-yellow-600"
+									loading={negotiateLoading}
+									className="flex-1 basis-full min-w-[160px] flex items-center justify-center gap-1.5 !px-3 !h-8
+    bg-blue-600 hover:bg-blue-700 border-blue-600 hover:border-blue-700"
 								>
-									<span className="truncate">Suggest Improvements</span>
+									<span className="truncate">
+										{negotiateLoading ? "Negotiating..." : "Help Me Negotiate"}
+									</span>
 								</Button>
 							</div>
 						)}
@@ -671,10 +681,53 @@ const ClauseAnalysis = React.memo<ClauseAnalysisProps>(
 				} else {
 					content = "Mock document content for browser testing";
 				}
-				setDocumentContent(content);
+				setLocalDocumentContent(content);
 			} catch (error) {
 				console.error("Error fetching document content:", error);
 				message.error("Failed to fetch document content");
+			}
+		};
+
+		// ===== NEGOTIATE HANDLER =====
+		const handleNegotiateClick = async (item: any) => {
+			try {
+				// Set the selected text for the negotiate modal
+
+				if (
+					typeof window !== "undefined" &&
+					typeof Office !== "undefined" &&
+					Office.context &&
+					Office.context.document &&
+					typeof Word !== "undefined"
+				) {
+					await Word.run(async (context) => {
+						// Use our advanced clause finding utility
+						const foundRange = await findClauseInDocument(context, item.text);
+
+						if (foundRange) {
+							// Successfully found the clause
+							foundRange.select();
+							foundRange.scrollIntoView();
+
+							// No highlighting to avoid issues with it persisting
+						}
+					});
+				}
+
+				if (setSelectedText) {
+					setSelectedText(item.text);
+				}
+
+				// Fetch document content if not already available
+				if (!localDocumentContent) {
+					await fetchDocumentContent();
+				}
+
+				// Open the negotiate modal
+				openNegotiateModal();
+			} catch (error) {
+				console.error("Error opening negotiate modal:", error);
+				message.error("Failed to open negotiation interface");
 			}
 		};
 
@@ -1026,6 +1079,19 @@ const ClauseAnalysis = React.memo<ClauseAnalysisProps>(
 						</div>
 					)}
 				</Modal>
+
+				{/* ===== UNIFIED NEGOTIATE MODAL ===== */}
+				<NegotiateModal
+					isVisible={isNegotiateModalVisible}
+					onClose={closeNegotiateModal}
+					selectedText={selectedText || ""}
+					documentContent={documentContent}
+					negotiateMessages={negotiateMessages}
+					setNegotiateMessages={setNegotiateMessages}
+					negotiateLoading={negotiateLoading}
+					onSubmit={handleNegotiateSubmit}
+					setSelectedText={setSelectedText}
+				/>
 			</>
 		);
 	}

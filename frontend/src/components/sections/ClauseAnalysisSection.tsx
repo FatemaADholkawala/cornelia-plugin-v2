@@ -98,40 +98,9 @@ const ClauseAnalysisSection: React.FC<ClauseAnalysisSectionProps> = ({
 
 	const renderPartyOption = (party: Party) => ({
 		value: party.name,
-		label: (
-			<div
-				style={{
-					display: "flex",
-					flexDirection: "column",
-					gap: "4px",
-					width: "100%",
-					maxWidth: "280px",
-				}}
-			>
-				<span
-					style={{
-						fontWeight: 500,
-						wordWrap: "break-word",
-						whiteSpace: "normal",
-						lineHeight: "1.4",
-					}}
-				>
-					{party.name}
-				</span>
-				<Tag
-					color={getTagColor(party.role)}
-					style={{
-						maxWidth: "100%",
-						whiteSpace: "normal",
-						height: "auto",
-						padding: "2px 8px",
-						lineHeight: "1.4",
-					}}
-				>
-					{party.role || "Unknown Role"}
-				</Tag>
-			</div>
-		),
+		label: party.name, // Simple string for closed state display
+		// Complex JSX for dropdown options will be handled by optionRender
+		party: party, // Store the full party object for access in optionRender
 	});
 
 	const handleFormChange = (field: keyof AnalysisFormData, value: any) => {
@@ -251,16 +220,18 @@ const ClauseAnalysisSection: React.FC<ClauseAnalysisSectionProps> = ({
 			<Collapse
 				defaultActiveKey={clauseAnalysis ? [] : ["analysis-form"]}
 				expandIcon={({ isActive }) => (
-					<CaretRightOutlined rotate={isActive ? 90 : 0} />
+					<div className="flex items-center gap-2">
+						<CaretRightOutlined rotate={isActive ? 90 : 0} />
+						<h3 className="flex text-xl font-semibold text-gray-800 m-0">
+							Document Analysis
+						</h3>
+					</div>
 				)}
 				className="bg-white rounded-xl shadow-sm border border-gray-100 hover:border-blue-400 hover:shadow-md transition-all duration-200"
 			>
 				<Panel
 					header={
-						<div className="flex items-center justify-between w-full">
-							<h3 className="text-xl font-semibold text-gray-800 m-0">
-								Document Analysis
-							</h3>
+						<div className="flex items-center justify-between w-full gap-3">
 							{clauseAnalysis && (
 								<div className="flex items-center gap-2 mr-4">
 									<Tag color="green">
@@ -305,17 +276,44 @@ const ClauseAnalysisSection: React.FC<ClauseAnalysisSectionProps> = ({
 										options={parties.map(renderPartyOption)}
 										listItemHeight={80}
 										listHeight={400}
-										optionRender={(option) => (
-											<div
-												style={{
-													padding: "8px",
-													width: "100%",
-													wordBreak: "break-word",
-												}}
-											>
-												{option.data.label}
-											</div>
-										)}
+										optionRender={(option) => {
+											const party = option.data.party;
+											return (
+												<div
+													style={{
+														display: "flex",
+														flexDirection: "column",
+														gap: "4px",
+														width: "100%",
+														maxWidth: "280px",
+														padding: "8px",
+													}}
+												>
+													<span
+														style={{
+															fontWeight: 500,
+															wordWrap: "break-word",
+															whiteSpace: "normal",
+															lineHeight: "1.4",
+														}}
+													>
+														{party.name}
+													</span>
+													<Tag
+														color={getTagColor(party.role)}
+														style={{
+															maxWidth: "100%",
+															whiteSpace: "normal",
+															height: "auto",
+															padding: "2px 8px",
+															lineHeight: "1.4",
+														}}
+													>
+														{party.role || "Unknown Role"}
+													</Tag>
+												</div>
+											);
+										}}
 										onChange={handlePartySelect}
 										showSearch
 										filterOption={(input, option) =>
@@ -324,7 +322,7 @@ const ClauseAnalysisSection: React.FC<ClauseAnalysisSectionProps> = ({
 												.includes(input.toLowerCase())
 										}
 									/>
-									{selectedParty && (
+									{/* {selectedParty && (
 										<div className="text-xs text-gray-600 bg-blue-50 px-3 py-2 rounded-md border border-blue-200">
 											<span className="font-medium text-blue-700">
 												Selected:
@@ -336,7 +334,7 @@ const ClauseAnalysisSection: React.FC<ClauseAnalysisSectionProps> = ({
 												{selectedParty.name}
 											</span>
 										</div>
-									)}
+									)} */}
 								</div>
 
 								{/* Question 2: Contract Type */}

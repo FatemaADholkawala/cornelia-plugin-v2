@@ -79,7 +79,10 @@ const ActionPanelSection: React.FC<ActionPanelSectionProps> = ({
 
 					{/* ===== NEW: UNIFIED NEGOTIATE BUTTON ===== */}
 					{/* This replaces both Redraft and Brainstorm buttons */}
-					<Tooltip title="Help me negotiate this clause" placement="top">
+					<Tooltip
+						title="Help me negotiate / redraft this clause"
+						placement="top"
+					>
 						<Button
 							type="primary"
 							icon={<ThunderboltOutlined />}
