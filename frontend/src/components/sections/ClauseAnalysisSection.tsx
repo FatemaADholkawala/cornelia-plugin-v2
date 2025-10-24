@@ -129,6 +129,15 @@ const ClauseAnalysisSection: React.FC<ClauseAnalysisSectionProps> = ({
 		try {
 			setClauseAnalysisLoading(true);
 
+			const analysisContainer = document.getElementById(
+				"document-analysis-container"
+			);
+
+			analysisContainer?.scrollIntoView({
+				behavior: "smooth",
+				block: "start",
+			});
+
 			console.log("Starting document analysis...", {
 				documentLength: documentContent?.length || 0,
 				party: formData.party?.name,
@@ -191,6 +200,8 @@ const ClauseAnalysisSection: React.FC<ClauseAnalysisSectionProps> = ({
 				missingCount: parsedResult.missing.length,
 			});
 
+			// Scroll to the top of the document analysis section
+
 			message.success("Document analysis completed successfully!");
 		} catch (error) {
 			console.error("Document analysis failed:", error);
@@ -224,7 +235,7 @@ const ClauseAnalysisSection: React.FC<ClauseAnalysisSectionProps> = ({
 	);
 
 	return (
-		<div className="px-4">
+		<div className="px-4" id="document-analysis-container">
 			<Collapse
 				defaultActiveKey={clauseAnalysis ? [] : ["analysis-form"]}
 				expandIcon={({ isActive }) => (

@@ -375,7 +375,7 @@ const CommentListView = React.memo(
 		return (
 			<div className="comments-container">
 				{resolvedComments.length > 0 && (
-					<div className="resolved-comments-section">
+					<div className="resolved-comments-section mb-4">
 						<div className="sticky-header">
 							<Collapse
 								className="mb-4"
@@ -391,7 +391,7 @@ const CommentListView = React.memo(
 									}
 									key="resolved"
 								>
-									<div className="resolved-comments-scroll">
+									<div className="resolved-comments-scroll mt-4">
 										<List
 											className="space-y-4"
 											itemLayout="vertical"

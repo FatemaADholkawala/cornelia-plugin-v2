@@ -84,9 +84,9 @@ const ActionPanelSection: React.FC<ActionPanelSectionProps> = ({
 						placement="top"
 					>
 						<Button
-							type="primary"
+							type="default"
 							icon={<ThunderboltOutlined />}
-							className="flex-1 min-w-[120px] flex items-center justify-center gap-2 !px-4 !h-9 bg-blue-500 hover:bg-blue-600"
+							className="flex-1 min-w-[120px] flex items-center justify-center gap-2 !px-4 !h-9"
 							disabled={!selectedText}
 							loading={negotiateLoading}
 							onClick={onNegotiateClick}

@@ -292,25 +292,49 @@ const NegotiateModal: React.FC<NegotiateModalProps> = ({
 
 						// CRITICAL: Update parent component's redraft state
 						if (onRedraftedClausesChange && onRedraftedTextsChange) {
-							// Check if this is a re-negotiation of an already redrafted clause
-							const isReNegotiation = redraftedClauses.has(originalClause);
+							// Find the original clause text - check if this is a re-negotiation
+							// by looking for the original clause in redraftedClauses set
+							let originalClauseText = originalClause;
+							let isReNegotiation = false;
+
+							// Check if the current text is already redrafted
+							for (const [
+								originalText,
+								redraftedText,
+							] of redraftedTexts.entries()) {
+								if (redraftedText === originalClause) {
+									originalClauseText = originalText;
+									isReNegotiation = true;
+									break;
+								}
+							}
+
+							// Also check if the original clause is directly in the set
+							if (!isReNegotiation && redraftedClauses.has(originalClause)) {
+								isReNegotiation = true;
+								originalClauseText = originalClause;
+							}
 
 							if (isReNegotiation) {
 								// Update existing redrafted text without adding to count
+								console.log(
+									"🔄 Re-negotiation detected - updating existing redrafted text"
+								);
 								onRedraftedTextsChange(
 									new Map(redraftedTexts).set(
-										originalClause,
+										originalClauseText,
 										cleanRedraftedClause
 									)
 								);
 							} else {
 								// Add new redrafted clause
+								console.log("➕ New redrafted clause - adding to count");
 								onRedraftedClausesChange(
-									new Set([...redraftedClauses, originalClause])
+									new Set([...redraftedClauses, originalClauseText])
 								);
 								onRedraftedTextsChange(
 									new Map(redraftedTexts).set(
-										originalClause,
+										originalClauseText,
 										cleanRedraftedClause
 									)
 								);
@@ -377,25 +401,49 @@ const NegotiateModal: React.FC<NegotiateModalProps> = ({
 
 						// CRITICAL: Update parent component's redraft state
 						if (onRedraftedClausesChange && onRedraftedTextsChange) {
-							// Check if this is a re-negotiation of an already redrafted clause
-							const isReNegotiation = redraftedClauses.has(originalClause);
+							// Find the original clause text - check if this is a re-negotiation
+							// by looking for the original clause in redraftedClauses set
+							let originalClauseText = originalClause;
+							let isReNegotiation = false;
+
+							// Check if the current text is already redrafted
+							for (const [
+								originalText,
+								redraftedText,
+							] of redraftedTexts.entries()) {
+								if (redraftedText === originalClause) {
+									originalClauseText = originalText;
+									isReNegotiation = true;
+									break;
+								}
+							}
+
+							// Also check if the original clause is directly in the set
+							if (!isReNegotiation && redraftedClauses.has(originalClause)) {
+								isReNegotiation = true;
+								originalClauseText = originalClause;
+							}
 
 							if (isReNegotiation) {
 								// Update existing redrafted text without adding to count
+								console.log(
+									"🔄 Re-negotiation detected - updating existing redrafted text"
+								);
 								onRedraftedTextsChange(
 									new Map(redraftedTexts).set(
-										originalClause,
+										originalClauseText,
 										cleanRedraftedClause
 									)
 								);
 							} else {
 								// Add new redrafted clause
+								console.log("➕ New redrafted clause - adding to count");
 								onRedraftedClausesChange(
-									new Set([...redraftedClauses, originalClause])
+									new Set([...redraftedClauses, originalClauseText])
 								);
 								onRedraftedTextsChange(
 									new Map(redraftedTexts).set(
-										originalClause,
+										originalClauseText,
 										cleanRedraftedClause
 									)
 								);
@@ -790,7 +838,7 @@ const NegotiateModal: React.FC<NegotiateModalProps> = ({
 				body: { padding: "0" },
 			}}
 		>
-			<div className="flex flex-col h-[600px] bg-white">
+			<div className="flex flex-col h-[80vh] bg-white">
 				{/* Selected Text Display - Enhanced */}
 				<div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-200">
 					<div className="flex items-start gap-3">
