@@ -32,9 +32,9 @@ const CommentListView = React.memo(
 		onCommentUpdate,
 	}: {
 		comments: Comment[];
-		setComments: (comments: Comment[]) => void;
+		setComments: (comments: any) => void;
 		initialResolvedComments?: Comment[];
-		onCommentUpdate?: (comment: Comment) => void;
+		onCommentUpdate?: (comment: any) => void;
 	}) => {
 		const [resolvedComments, setResolvedComments] = useState<Comment[]>([]);
 
@@ -285,7 +285,7 @@ const CommentListView = React.memo(
 			);
 		};
 
-		const renderCommentCard = (comment: Comment, isResolved = false) => (
+		const renderCommentCard = (comment: any, isResolved = false) => (
 			<Card
 				className={`rounded-lg shadow-sm hover:shadow transition-all duration-200 
         ${isResolved ? "bg-gray-50/50" : "bg-white"}`}

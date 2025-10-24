@@ -98,6 +98,21 @@ const ClauseAnalysis = React.memo<ClauseAnalysisProps>(
 		const commentTextAreaRef = useRef<any>(null);
 		const [isBrainstormModalVisible, setIsBrainstormModalVisible] =
 			useState(false);
+
+		// Clear redraft state when new analysis results come in
+		useEffect(() => {
+			if (results && results.clauses) {
+				// Clear all redraft states when new analysis is performed
+				onRedraftedClausesChange(new Set());
+				onRedraftedTextsChange(new Map());
+				onRedraftReviewStatesChange(new Map());
+			}
+		}, [
+			results,
+			onRedraftedClausesChange,
+			onRedraftedTextsChange,
+			onRedraftReviewStatesChange,
+		]);
 		const [brainstormMessages, setBrainstormMessages] = useState<any[]>([]);
 		const [brainstormLoading, setBrainstormLoading] = useState(false);
 		const [activeBrainstormItem, setActiveBrainstormItem] = useState<any>(null);
@@ -323,6 +338,63 @@ const ClauseAnalysis = React.memo<ClauseAnalysisProps>(
 			} catch (error: any) {
 				console.error("Error in accept redraft:", error);
 				message.error("Failed to redraft: " + error.message);
+			}
+		};
+
+		const handleRevertRedraft = async (item: any) => {
+			try {
+				// Check if we're in Office environment and Word is available
+				if (
+					typeof window !== "undefined" &&
+					typeof Office !== "undefined" &&
+					Office.context &&
+					Office.context.document &&
+					typeof Word !== "undefined"
+				) {
+					await Word.run(async (context) => {
+						const redraftedText = redraftedTexts.get(item.text);
+						if (!redraftedText) {
+							throw new Error("No redrafted text found for this clause");
+						}
+
+						// Use our advanced clause finding and replacement utility to revert
+						const success = await findAndReplaceClause(
+							context,
+							redraftedText,
+							item.text // Revert to original text
+						);
+
+						if (success) {
+							// Update tracking states - remove from redrafted clauses
+							const newRedraftedClauses = new Set(redraftedClauses);
+							newRedraftedClauses.delete(item.text);
+							onRedraftedClausesChange(newRedraftedClauses);
+
+							// Remove from redrafted texts map
+							const newRedraftedTexts = new Map(redraftedTexts);
+							newRedraftedTexts.delete(item.text);
+							onRedraftedTextsChange(newRedraftedTexts);
+
+							message.success("Clause reverted to original text successfully");
+						} else {
+							throw new Error("Could not find the redrafted clause to revert");
+						}
+					});
+				} else {
+					// In browser environment, just update UI state
+					const newRedraftedClauses = new Set(redraftedClauses);
+					newRedraftedClauses.delete(item.text);
+					onRedraftedClausesChange(newRedraftedClauses);
+
+					const newRedraftedTexts = new Map(redraftedTexts);
+					newRedraftedTexts.delete(item.text);
+					onRedraftedTextsChange(newRedraftedTexts);
+
+					message.success("Clause reverted to original text (UI only)");
+				}
+			} catch (error: any) {
+				console.error("Error reverting redraft:", error);
+				message.error("Failed to revert clause: " + error.message);
 			}
 		};
 
@@ -777,83 +849,151 @@ const ClauseAnalysis = React.memo<ClauseAnalysisProps>(
 							defaultActiveKey={["risky", "redrafted"]}
 							className="shadow-sm space-y-2"
 						>
-							{/* Redrafted Clauses Panel */}
+							{/* Enhanced Redrafted Clauses Panel */}
 							{redraftedClauses.size > 0 && (
 								<Panel
 									header={
-										<div className="flex items-center">
-											<EditOutlined className="text-green-500 mr-2 text-lg" />
-											<span className="font-semibold text-green-700">
-												Redrafted Clauses ({redraftedClauses.size})
-											</span>
+										<div className="flex items-center justify-between w-full">
+											<div className="flex items-center">
+												<CheckCircleOutlined className="text-green-600 mr-2 text-lg" />
+												<span className="font-semibold text-green-700">
+													Redrafted Clauses ({redraftedClauses.size})
+												</span>
+											</div>
 										</div>
 									}
 									key="redrafted"
-									className="bg-green-50/50 border-green-100 rounded-md overflow-hidden"
+									className="bg-green-50/30 border-green-200 rounded-md overflow-hidden shadow-sm"
 								>
 									<List
 										dataSource={[...acceptable, ...risky, ...missing].filter(
 											(item) => redraftedClauses.has(item.text)
 										)}
-										renderItem={(item) => (
-											<List.Item
-												className="bg-white mb-3 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 border border-green-100/50
-                        first:mt-0 last:mb-0"
-											>
-												<div className="w-full px-4 py-3">
-													<div className="flex items-center justify-between mb-2.5">
-														<Text strong className="text-gray-800 text-base">
-															{item.title || item.type || "Clause"}
-														</Text>
-														<Button
-															type="link"
-															size="small"
-															className="text-green-600 hover:text-green-700"
-															onClick={(e) => {
-																e.stopPropagation();
-																const redraftedText = redraftedTexts.get(
-																	item.text
-																);
-
-																if (!redraftedText) {
-																	message.warning("Redrafted text not found");
-																	return;
-																}
-
-																scrollToClause(redraftedText);
-															}}
-															icon={<CheckCircleOutlined />}
-														>
-															Go to clause →
-														</Button>
-													</div>
-
-													<div className="grid grid-cols-1 gap-2">
-														<div className="bg-gray-50/70 rounded-md p-2.5 text-gray-600 text-sm">
-															<div className="text-xs text-gray-500 mb-1 font-medium">
-																Original:
+										renderItem={(item) => {
+											const redraftedText = redraftedTexts.get(item.text);
+											return (
+												<List.Item className="bg-white mb-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 border border-green-200 first:mt-0 last:mb-0">
+													<div className="w-full px-4 py-4">
+														{/* Header Section */}
+														<div className="flex items-center justify-between mb-3">
+															<div className="flex items-center gap-2">
+																<Text
+																	strong
+																	className="text-gray-800 text-base"
+																>
+																	{item.title || item.type || "Clause"}
+																</Text>
 															</div>
-															{item.text}
+															<Button
+																type="link"
+																size="small"
+																className="text-green-600 hover:text-green-700 font-medium"
+																onClick={(e) => {
+																	e.stopPropagation();
+																	scrollToClause(redraftedText || item.text);
+																}}
+															>
+																Go to clause →
+															</Button>
 														</div>
 
-														<div className="bg-green-50/50 rounded-md p-2.5 text-gray-700 text-sm">
-															<div className="text-xs text-green-600 mb-1 font-medium">
-																Redrafted:
+														{/* Comparison View */}
+														<div className="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-3">
+															{/* Original Clause */}
+															<div className="rounded-lg p-3 bg-gray-50 border border-gray-200">
+																<div className="text-xs text-gray-500 mb-2 font-semibold uppercase tracking-wide flex items-center">
+																	<ExclamationCircleOutlined className="mr-1.5 text-gray-400" />
+																	Original Clause
+																</div>
+																<div className="text-gray-700 text-sm leading-relaxed">
+																	{item.text}
+																</div>
 															</div>
-															{redraftedTexts.get(item.text)}
+
+															{/* Redrafted Clause */}
+															{redraftedText && (
+																<div className="rounded-lg p-3 bg-green-50 border border-green-300">
+																	<div className="text-xs text-green-700 mb-2 font-semibold uppercase tracking-wide flex items-center">
+																		<CheckCircleOutlined className="mr-1.5" />
+																		Redrafted Clause
+																	</div>
+																	<div className="text-gray-900 text-sm leading-relaxed font-medium">
+																		{redraftedText}
+																	</div>
+																</div>
+															)}
 														</div>
 
-														<div className="bg-gray-50/70 rounded-md p-2.5 text-gray-600 text-sm">
+														{/* Analysis Section */}
+														<div className="bg-gray-50/70 rounded-lg p-3 text-gray-600 text-sm border border-gray-200 mb-3">
 															<div className="text-xs text-gray-500 mb-1 font-medium flex items-center">
-																<InfoCircleOutlined className="mr-1.5 text-green-500" />
-																Analysis:
+																<InfoCircleOutlined className="mr-1.5 text-blue-500" />
+																Original Analysis
 															</div>
-															{item.explanation || item.description}
+															<div className="text-gray-700">
+																{item.explanation || item.description}
+															</div>
+														</div>
+
+														{/* Action Buttons */}
+														<div className="flex flex-wrap gap-2">
+															{/* Re-negotiate Button */}
+															<Button
+																type="primary"
+																size="small"
+																icon={<ThunderboltOutlined />}
+																onClick={async (e) => {
+																	e.stopPropagation();
+																	await handleNegotiateClick({
+																		...item,
+																		text: redraftedText || item.text,
+																	});
+																}}
+																loading={negotiateLoading}
+																className="flex-1 min-w-[140px] !bg-green-600 hover:!bg-green-700 border-green-600 hover:!border-green-700"
+															>
+																{negotiateLoading
+																	? "Negotiating..."
+																	: "Re-negotiate"}
+															</Button>
+
+															{/* Comment Button */}
+															<Button
+																size="small"
+																icon={<MessageOutlined />}
+																onClick={(e) => {
+																	e.stopPropagation();
+																	setActiveCommentItem({
+																		...item,
+																		text: redraftedText || item.text,
+																	});
+																	setIsCommentModalVisible(true);
+																	setTimeout(() => {
+																		commentTextAreaRef.current?.focus();
+																	}, 100);
+																}}
+																className="flex-1 min-w-[120px] text-blue-600 hover:text-blue-700 border-blue-600 hover:border-blue-700"
+															>
+																Comment
+															</Button>
+
+															{/* Revert Button */}
+															{/* <Button
+																size="small"
+																icon={<ReloadOutlined />}
+																onClick={async (e) => {
+																	e.stopPropagation();
+																	await handleRevertRedraft(item);
+																}}
+																className="flex-1 min-w-[120px] text-orange-600 hover:text-orange-700 border-orange-600 hover:border-orange-700"
+															>
+																Revert
+															</Button> */}
 														</div>
 													</div>
-												</div>
-											</List.Item>
-										)}
+												</List.Item>
+											);
+										}}
 									/>
 								</Panel>
 							)}
@@ -1108,6 +1248,10 @@ const ClauseAnalysis = React.memo<ClauseAnalysisProps>(
 					negotiateLoading={negotiateLoading}
 					onSubmit={handleNegotiateSubmit}
 					setSelectedText={setSelectedText}
+					onRedraftedClausesChange={onRedraftedClausesChange}
+					onRedraftedTextsChange={onRedraftedTextsChange}
+					redraftedClauses={redraftedClauses}
+					redraftedTexts={redraftedTexts}
 				/>
 			</>
 		);

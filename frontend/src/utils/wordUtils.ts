@@ -2,12 +2,12 @@
  * Utility function to perform a sequential chunk search for text longer than 255 characters
  * This handles cases where the exact text exists in the document but is too long for a single search
  *
- * @param {Word.RequestContext} context - The Word RequestContext
+ * @param {any} context - The Word RequestContext
  * @param {string} searchText - The text to search for
- * @returns {Promise<{success: boolean, range: Word.Range|null}>} - Result object with success flag and range if found
+ * @returns {Promise<{success: boolean, range: any|null}>} - Result object with success flag and range if found
  */
 const performSequentialChunkSearch = async (
-	context: Word.RequestContext,
+	context: any, // Changed from Word.RequestContext
 	searchText: string
 ) => {
 	try {
@@ -106,15 +106,15 @@ const performSequentialChunkSearch = async (
 /**
  * Helper function to validate and extend a range to include the complete text
  *
- * @param {Word.RequestContext} context - The Word RequestContext
- * @param {Word.Range} initialRange - The initial range found for the first chunk
+ * @param {any} context - The Word RequestContext
+ * @param {any} initialRange - The initial range found for the first chunk
  * @param {string[]} chunks - Array of text chunks to search for
  * @param {string} fullSearchText - The complete text we're searching for
- * @returns {Promise<{success: boolean, range: Word.Range|null}>} - Result with success flag and range
+ * @returns {Promise<{success: boolean, range: any|null}>} - Result with success flag and range
  */
 const validateAndExtendRange = async (
-	context: Word.RequestContext,
-	initialRange: Word.Range,
+	context: any, // Changed from Word.RequestContext
+	initialRange: any, // Changed from Word.Range
 	chunks: string[],
 	fullSearchText: string
 ) => {
@@ -216,14 +216,14 @@ const validateAndExtendRange = async (
 /**
  * Helper function to find the best match for a search text within a range
  *
- * @param {Word.RequestContext} context - The Word RequestContext
- * @param {Word.Range} range - The range to search within
+ * @param {any} context - The Word RequestContext
+ * @param {any} range - The range to search within
  * @param {string} searchText - The text to search for
- * @returns {Promise<Word.Range|null>} - The best matching range or null
+ * @returns {Promise<any|null>} - The best matching range or null
  */
 const findBestMatchInRange = async (
-	context: Word.RequestContext,
-	range: Word.Range,
+	context: any, // Changed from Word.RequestContext
+	range: any, // Changed from Word.Range
 	searchText: string
 ) => {
 	try {
@@ -263,7 +263,7 @@ const findBestMatchInRange = async (
 };
 
 const searchAndReplaceText = async (
-	context: Word.RequestContext,
+	context: any, // Changed from Word.RequestContext
 	searchText: string,
 	replacementText: string | null = null
 ) => {
@@ -280,7 +280,7 @@ const searchAndReplaceText = async (
 			if (replacementText) {
 				searchResults.items[0].insertText(
 					replacementText,
-					Word.InsertLocation.replace
+					"Replace" // Changed from Word.InsertLocation.replace
 				);
 				await context.sync();
 			}
@@ -299,7 +299,7 @@ const searchAndReplaceText = async (
 		if (replacementText) {
 			sequentialSearchResult.range!.insertText(
 				replacementText,
-				Word.InsertLocation.replace
+				"Replace" // Changed from Word.InsertLocation.replace
 			);
 			await context.sync();
 			console.log("Replaced text using sequential chunk search");
@@ -312,7 +312,7 @@ const searchAndReplaceText = async (
 
 	// Split search text into chunks of 255 characters
 	const fallbackChunks = cleanedText.match(/.{1,255}/g) || [];
-	let firstChunkRange: Word.Range | null = null;
+	let firstChunkRange: any | null = null;
 
 	// Find and store the position of the first chunk
 	const firstChunkResults = context.document.body.search(fallbackChunks[0]);
@@ -333,14 +333,14 @@ const searchAndReplaceText = async (
 		await context.sync();
 
 		for (let j = 0; j < searchResults.items.length; j++) {
-			searchResults.items[j].insertText("", Word.InsertLocation.replace); // Delete the chunk
+			searchResults.items[j].insertText("", "Replace"); // Delete the chunk
 		}
 		await context.sync();
 	}
 
 	// Insert new text at the position of the first chunk
 	if (replacementText) {
-		firstChunkRange.insertText(replacementText, Word.InsertLocation.replace);
+		firstChunkRange.insertText(replacementText, "Replace");
 		await context.sync();
 	}
 
@@ -351,12 +351,12 @@ const searchAndReplaceText = async (
  * Advanced search function for finding clauses in Word documents
  * Handles multi-line text and formatting issues by using a progressive search strategy
  *
- * @param {Word.RequestContext} context - The Word RequestContext
+ * @param {any} context - The Word RequestContext
  * @param {string} clauseText - The full text of the clause to find
- * @returns {Promise<Word.Range|null>} - The found range or null if not found
+ * @returns {Promise<any|null>} - The found range or null if not found
  */
 const findClauseInDocument = async (
-	context: Word.RequestContext,
+	context: any, // Changed from Word.RequestContext
 	clauseText: string
 ) => {
 	// Clean the clause text - remove extra whitespace
@@ -469,13 +469,13 @@ const findClauseInDocument = async (
  * Advanced function to find and replace an entire clause in a Word document
  * This handles cases where we can only find a portion of the text due to formatting
  *
- * @param {Word.RequestContext} context - The Word RequestContext
+ * @param {any} context - The Word RequestContext
  * @param {string} clauseText - The full text of the clause to find
  * @param {string} replacementText - The text to replace the clause with
  * @returns {Promise<boolean>} - Whether the operation was successful
  */
 const findAndReplaceClause = async (
-	context: Word.RequestContext,
+	context: any, // Changed from Word.RequestContext
 	clauseText: string,
 	replacementText: string
 ) => {
@@ -495,7 +495,7 @@ const findAndReplaceClause = async (
 					// Found the exact text, replace it directly
 					fullTextResults.items[0].insertText(
 						replacementText,
-						Word.InsertLocation.replace
+						"Replace" // Changed from Word.InsertLocation.replace
 					);
 					await context.sync();
 					console.log("Replaced clause using full text search");
@@ -523,7 +523,7 @@ const findAndReplaceClause = async (
 				// Replace the text
 				sequentialSearchResult.range!.insertText(
 					replacementText,
-					Word.InsertLocation.replace
+					"Replace" // Changed from Word.InsertLocation.replace
 				);
 				await context.sync();
 				console.log("Replaced clause using sequential chunk search");
@@ -557,7 +557,7 @@ const findAndReplaceClause = async (
 						// Replace the text
 						extendedResult.range!.insertText(
 							replacementText,
-							Word.InsertLocation.replace
+							"Replace" // Changed from Word.InsertLocation.replace
 						);
 						await context.sync();
 						console.log("Replaced clause using beginning text + extension");
@@ -590,7 +590,7 @@ const findAndReplaceClause = async (
 						// Replace the text
 						extendedResult.range!.insertText(
 							replacementText,
-							Word.InsertLocation.replace
+							"Replace" // Changed from Word.InsertLocation.replace
 						);
 						await context.sync();
 						console.log("Replaced clause using end text + backward extension");
@@ -711,7 +711,7 @@ const findAndReplaceClause = async (
 					// Replace the text
 					bestMatchRange.insertText(
 						replacementText,
-						Word.InsertLocation.replace
+						"Replace" // Changed from Word.InsertLocation.replace
 					);
 					await context.sync();
 					return true;
@@ -721,7 +721,7 @@ const findAndReplaceClause = async (
 
 		// If we couldn't expand the selection or didn't need to, just replace the found text
 		console.log("Using direct replacement for clause");
-		foundRange.insertText(replacementText, Word.InsertLocation.replace);
+		foundRange.insertText(replacementText, "Replace"); // Changed from Word.InsertLocation.replace
 		await context.sync();
 		return true;
 	} catch (error) {
@@ -733,14 +733,14 @@ const findAndReplaceClause = async (
 /**
  * Helper function to extend a range forward to include the full text
  *
- * @param {Word.RequestContext} context - The Word RequestContext
- * @param {Word.Range} initialRange - The initial range found
+ * @param {any} context - The Word RequestContext
+ * @param {any} initialRange - The initial range found
  * @param {string} fullText - The complete text we're searching for
- * @returns {Promise<{success: boolean, range: Word.Range|null}>} - Result with success flag and range
+ * @returns {Promise<{success: boolean, range: any|null}>} - Result with success flag and range
  */
 const extendRangeToFullText = async (
-	context: Word.RequestContext,
-	initialRange: Word.Range,
+	context: any, // Changed from Word.RequestContext
+	initialRange: any, // Changed from Word.Range
 	fullText: string
 ) => {
 	try {
@@ -827,14 +827,14 @@ const extendRangeToFullText = async (
 /**
  * Helper function to extend a range backward to include the full text
  *
- * @param {Word.RequestContext} context - The Word RequestContext
- * @param {Word.Range} endRange - The range containing the end of the text
+ * @param {any} context - The Word RequestContext
+ * @param {any} endRange - The range containing the end of the text
  * @param {string} fullText - The complete text we're searching for
- * @returns {Promise<{success: boolean, range: Word.Range|null}>} - Result with success flag and range
+ * @returns {Promise<{success: boolean, range: any|null}>} - Result with success flag and range
  */
 const extendRangeBackwardToFullText = async (
-	context: Word.RequestContext,
-	endRange: Word.Range,
+	context: any, // Changed from Word.RequestContext
+	endRange: any, // Changed from Word.Range
 	fullText: string
 ) => {
 	try {

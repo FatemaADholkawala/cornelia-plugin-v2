@@ -43,6 +43,11 @@ interface NegotiateModalProps {
 		documentContent: string
 	) => void;
 	setSelectedText?: (text: string) => void; // To update parent's selected text
+	// Redraft state management props
+	onRedraftedClausesChange?: (clauses: Set<string>) => void;
+	onRedraftedTextsChange?: (texts: Map<string, string>) => void;
+	redraftedClauses?: Set<string>;
+	redraftedTexts?: Map<string, string>;
 }
 
 const NegotiateModal: React.FC<NegotiateModalProps> = ({
@@ -55,6 +60,10 @@ const NegotiateModal: React.FC<NegotiateModalProps> = ({
 	negotiateLoading,
 	onSubmit,
 	setSelectedText,
+	onRedraftedClausesChange,
+	onRedraftedTextsChange,
+	redraftedClauses = new Set(),
+	redraftedTexts = new Map(),
 }) => {
 	const [input, setInput] = useState("");
 	const [acceptedRedrafts, setAcceptedRedrafts] = useState<Set<string>>(
@@ -281,9 +290,39 @@ const NegotiateModal: React.FC<NegotiateModalProps> = ({
 							setSelectedText(cleanRedraftedClause);
 						}
 
-						console.log("✅ State updated with new text");
+						// CRITICAL: Update parent component's redraft state
+						if (onRedraftedClausesChange && onRedraftedTextsChange) {
+							// Check if this is a re-negotiation of an already redrafted clause
+							const isReNegotiation = redraftedClauses.has(originalClause);
+
+							if (isReNegotiation) {
+								// Update existing redrafted text without adding to count
+								onRedraftedTextsChange(
+									new Map(redraftedTexts).set(
+										originalClause,
+										cleanRedraftedClause
+									)
+								);
+							} else {
+								// Add new redrafted clause
+								onRedraftedClausesChange(
+									new Set([...redraftedClauses, originalClause])
+								);
+								onRedraftedTextsChange(
+									new Map(redraftedTexts).set(
+										originalClause,
+										cleanRedraftedClause
+									)
+								);
+							}
+						}
+
+						console.log("✅ State updated with new text and redraft tracking");
 
 						antMessage.success("✅ Changes applied successfully");
+
+						// Close the modal after successful acceptance
+						onClose();
 						return; // Success!
 					}
 
@@ -336,9 +375,39 @@ const NegotiateModal: React.FC<NegotiateModalProps> = ({
 							setSelectedText(cleanRedraftedClause);
 						}
 
-						console.log("✅ State updated with new text");
+						// CRITICAL: Update parent component's redraft state
+						if (onRedraftedClausesChange && onRedraftedTextsChange) {
+							// Check if this is a re-negotiation of an already redrafted clause
+							const isReNegotiation = redraftedClauses.has(originalClause);
+
+							if (isReNegotiation) {
+								// Update existing redrafted text without adding to count
+								onRedraftedTextsChange(
+									new Map(redraftedTexts).set(
+										originalClause,
+										cleanRedraftedClause
+									)
+								);
+							} else {
+								// Add new redrafted clause
+								onRedraftedClausesChange(
+									new Set([...redraftedClauses, originalClause])
+								);
+								onRedraftedTextsChange(
+									new Map(redraftedTexts).set(
+										originalClause,
+										cleanRedraftedClause
+									)
+								);
+							}
+						}
+
+						console.log("✅ State updated with new text and redraft tracking");
 
 						antMessage.success("✅ Changes applied successfully");
+
+						// Close the modal after successful acceptance
+						onClose();
 					} else {
 						throw new Error(
 							"Could not find the clause in the document. Please select the text you want to replace and try again."
@@ -351,7 +420,32 @@ const NegotiateModal: React.FC<NegotiateModalProps> = ({
 				if (setSelectedText) {
 					setSelectedText(cleanRedraftedClause);
 				}
+
+				// CRITICAL: Update parent component's redraft state
+				if (onRedraftedClausesChange && onRedraftedTextsChange) {
+					// Check if this is a re-negotiation of an already redrafted clause
+					const isReNegotiation = redraftedClauses.has(originalClause);
+
+					if (isReNegotiation) {
+						// Update existing redrafted text without adding to count
+						onRedraftedTextsChange(
+							new Map(redraftedTexts).set(originalClause, cleanRedraftedClause)
+						);
+					} else {
+						// Add new redrafted clause
+						onRedraftedClausesChange(
+							new Set([...redraftedClauses, originalClause])
+						);
+						onRedraftedTextsChange(
+							new Map(redraftedTexts).set(originalClause, cleanRedraftedClause)
+						);
+					}
+				}
+
 				antMessage.success("✅ Changes applied (UI only - not in Office)");
+
+				// Close the modal after successful acceptance
+				onClose();
 			}
 		} catch (error: any) {
 			console.error("❌ Error accepting changes:", error);
