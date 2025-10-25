@@ -5,11 +5,11 @@
     xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0"
     xsi:type="TaskPaneApp">
 
-    <Id>7c9e6679-7425-40de-944b-e07fc1f90ae7</Id>
+    <Id>3d6f0a8b-1c2e-4f90-9b7a-5e6f1d2c3b4a</Id>
     <Version>1.0.0.0</Version>
-    <ProviderName>Cornelia AI</ProviderName>
+    <ProviderName>Cornelia V2</ProviderName>
     <DefaultLocale>en-US</DefaultLocale>
-    <DisplayName DefaultValue="Cornelia AI"/>
+    <DisplayName DefaultValue="Cornelia V2"/>
     <Description DefaultValue="AI-powered legal document analysis"/>
     <IconUrl DefaultValue="https://cornelialegal.ai/word-plugin/assets/icon-32.png"/>
     <HighResolutionIconUrl DefaultValue="https://cornelialegal.ai/word-plugin/assets/icon-64.png"/>
@@ -25,7 +25,7 @@
     </Hosts>
 
     <DefaultSettings>
-        <SourceLocation DefaultValue="https://main.d1rn1h8o94jhtl.amplifyapp.com/taskpane/"/>
+        <SourceLocation DefaultValue="https://localhost:3002/taskpane/"/>
     </DefaultSettings>
 
     <Permissions>ReadWriteDocument</Permissions>
@@ -78,18 +78,18 @@
                 <bt:Image id="Icon.80x80" DefaultValue="https://cornelialegal.ai/word-plugin/assets/icon-80.png"/>
             </bt:Images>
             <bt:Urls>
-                <bt:Url id="Commands.Url" DefaultValue="https://main.d1rn1h8o94jhtl.amplifyapp.com/commands/"/>
-                <bt:Url id="Taskpane.Url" DefaultValue="https://main.d1rn1h8o94jhtl.amplifyapp.com/taskpane/"/>
+                <bt:Url id="Commands.Url" DefaultValue="https://localhost:3002/commands/"/>
+                <bt:Url id="Taskpane.Url" DefaultValue="https://localhost:3002/taskpane/"/>
                 <bt:Url id="GetStarted.LearnMoreUrl" DefaultValue="https://cornelialegal.ai"/>
             </bt:Urls>
             <bt:ShortStrings>
-                <bt:String id="GetStarted.Title" DefaultValue="Get started with Cornelia AI"/>
-                <bt:String id="CommandsGroup.Label" DefaultValue="Cornelia AI"/>
-                <bt:String id="TaskpaneButton.Label" DefaultValue="Cornelia AI"/>
+                <bt:String id="GetStarted.Title" DefaultValue="Get started with Cornelia V2"/>
+                <bt:String id="CommandsGroup.Label" DefaultValue="Cornelia V2"/>
+                <bt:String id="TaskpaneButton.Label" DefaultValue="Cornelia V2"/>
             </bt:ShortStrings>
             <bt:LongStrings>
-                <bt:String id="GetStarted.Description" DefaultValue="Cornelia loaded successfully. Go to the HOME tab and click the 'Cornelia AI' button to get started."/>
-                <bt:String id="TaskpaneButton.Tooltip" DefaultValue="Click to open Cornelia AI"/>
+                <bt:String id="GetStarted.Description" DefaultValue="Cornelia loaded successfully. Go to the HOME tab and click the 'Cornelia' button to get started."/>
+                <bt:String id="TaskpaneButton.Tooltip" DefaultValue="Click to open Cornelia V2"/>
             </bt:LongStrings>
         </Resources>
     </VersionOverrides>

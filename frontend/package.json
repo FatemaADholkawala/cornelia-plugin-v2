@@ -10,7 +10,9 @@
 		"type-check": "tsc --noEmit",
 		"dev": "next dev -p 3002 --experimental-https --experimental-https-key ./localhost-key.pem --experimental-https-cert ./localhost.pem",
 		"addin:start": "office-addin-debugging start manifest.xml desktop",
-		"addin:stop": "office-addin-debugging stop manifest.xml"
+		"addin:stop": "office-addin-debugging stop manifest.xml",
+		"addinLocal:start": "office-addin-debugging start manifest_local.xml desktop",
+		"addinLocal:stop": "office-addin-debugging stop manifest_local.xml"
 	},
 	"dependencies": {
 		"@ant-design/icons": "^5.5.1",

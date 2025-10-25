@@ -15,8 +15,9 @@ import {
 
 // Cornelia API base URL
 const BASE_URL =
-	process.env.NEXT_PUBLIC_API_URL || "https://cornelialegal.ai/api";
+	process.env.NEXT_PUBLIC_API_URL || "https://stage.cornelialegal.ai/api/";
 
+//const BASE_URL = "https://cornelialegal.ai/api";
 // Create axios instance
 const api: AxiosInstance = axios.create({
 	baseURL: BASE_URL,
@@ -83,6 +84,7 @@ export const authApi = {
 	): Promise<{ success: boolean; tokens?: AuthTokens; error?: string }> => {
 		try {
 			const response = await api.post("/token/", { username, password });
+			console.log("Login response:", response.data);
 			if (response.data.access) {
 				// Store the entire response data as tokens (matching original project)
 				storeTokens(response.data);
