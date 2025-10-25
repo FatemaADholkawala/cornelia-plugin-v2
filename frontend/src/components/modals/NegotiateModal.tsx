@@ -278,8 +278,8 @@ const NegotiateModal: React.FC<NegotiateModalProps> = ({
 						});
 
 						// SELECT the newly inserted range
-						insertedRange.select();
-						insertedRange.scrollIntoView();
+						insertedRange?.select();
+						insertedRange?.scrollIntoView();
 						await context.sync();
 
 						console.log("✅ New text selected in Word");
@@ -382,8 +382,8 @@ const NegotiateModal: React.FC<NegotiateModalProps> = ({
 							});
 
 							// Select the entire found range
-							foundRange.select();
-							foundRange.scrollIntoView();
+							foundRange?.select();
+							foundRange?.scrollIntoView();
 							await context.sync();
 
 							console.log("✅ New text selected in Word");
@@ -530,8 +530,8 @@ const NegotiateModal: React.FC<NegotiateModalProps> = ({
 					await context.sync();
 
 					if (searchResults.items.length > 0) {
-						searchResults.items[0].select();
-						searchResults.items[0].scrollIntoView();
+						searchResults.items[0]?.select();
+						searchResults.items[0]?.scrollIntoView();
 
 						setTimeout(async () => {
 							await Word.run(async (context) => {
